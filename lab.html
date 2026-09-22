@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>小果 · 神经网络实验室</title>
+<style>
+:root{--bg:#f4f7f2;--ink:#193c32;--muted:#65786e;--green:#247e5f;--line:#dce5da}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.65 system-ui,"Microsoft YaHei",sans-serif}main{max-width:1240px;margin:auto;padding:32px 26px 60px}h1{font-size:32px;line-height:1.2;margin:8px 0 10px}h2{font-size:19px;margin:0 0 12px}h3{font-size:15px;margin:0 0 10px}p{margin:6px 0;color:var(--muted)}.eyebrow{color:var(--green);font-size:11px;font-weight:750;letter-spacing:2px}.header-row{display:flex;justify-content:space-between;align-items:center;gap:20px}.badge{display:inline-block;padding:5px 10px;background:#e3eddf;border-radius:7px;font-size:12px;color:var(--green)}.card{background:white;border:1px solid var(--line);border-radius:15px;padding:21px}.toolbar{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:16px 0}.source{margin-left:auto;font-size:12px;color:var(--muted)}button,select,input{font:inherit}button,select{border:1px solid var(--line);border-radius:8px;background:white;color:var(--ink);padding:8px 12px}button{cursor:pointer}button:hover{border-color:var(--green);background:#eff6ec}button:disabled{opacity:.5;cursor:wait}.primary{background:var(--green);color:white;border-color:var(--green)}.primary:hover{background:#1a6249;color:white}button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid #d9a13b;outline-offset:2px}input[type=number]{width:88px;border:1px solid var(--line);border-radius:6px;padding:7px}.layout{display:grid;grid-template-columns:370px 1fr;gap:18px}.preset-row{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:15px}.preset-row button{padding:6px 10px;font-size:12px}.feature{margin-bottom:11px}.feature-head{display:flex;justify-content:space-between;gap:10px;font-size:12px}.feature output{color:var(--green);font-variant-numeric:tabular-nums}.feature input{width:100%;accent-color:var(--green);margin:4px 0}details{margin-top:10px}summary{cursor:pointer;color:var(--green);font-size:12px}.small{font-size:12px;color:var(--muted)}.probabilities{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.probability{padding:12px;background:#f3f6f0;border-radius:9px}.probability strong{display:block;font-size:27px;line-height:1.4}.bar{height:5px;background:#e1e7dc;border-radius:4px;overflow:hidden;margin-top:7px}.fill{height:100%;background:var(--green);transition:width .2s}.training{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:17px 0 8px}.training label{font-size:12px}.section-space{margin-top:18px}.chart{width:100%;height:200px;display:block}.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--muted)}.legend span:before{content:"";display:inline-block;width:10px;height:3px;background:var(--c);vertical-align:middle;margin-right:5px}#neurons{width:100%;height:120px;display:block;background:#eff4eb;border-radius:7px}.heading-line{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.status{min-height:26px;padding:5px 0;font-size:12px;color:var(--green)}.status.error{color:#a24530}.experiments{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}.experiment{padding:15px;text-align:left;min-height:122px;display:block}.experiment strong{display:block;font-size:14px;margin-bottom:5px}.experiment span{display:block;font-size:12px;color:var(--muted);line-height:1.5}.experiment.selected{outline:2px solid var(--green);outline-offset:1px}.result-metrics{display:flex;gap:12px;flex-wrap:wrap;margin:15px 0}.metric{min-width:140px;flex:1;border:1px solid var(--line);padding:12px;border-radius:9px}.metric strong{display:block;font-size:24px}.metric span{font-size:12px;color:var(--muted)}.result-chart{height:245px}.table-scroll{overflow:auto;margin-top:18px}table{border-collapse:collapse;width:100%;font-size:12px;white-space:nowrap}th,td{text-align:left;padding:9px 12px;border-bottom:1px solid #e9eee4}th{background:#f4f7f0;font-weight:600}.notes{font-size:12px;color:var(--muted);padding-left:20px}.notes li{margin:5px 0}.result-head{display:flex;justify-content:space-between;align-items:center;gap:12px}.sample-result{font-size:12px;min-height:23px;color:var(--muted)}footer{margin-top:22px;font-size:12px;color:var(--muted)}
+@media(max-width:900px){.layout{grid-template-columns:1fr}.features-main{display:grid;grid-template-columns:1fr 1fr;gap:0 20px}.experiments{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:540px){main{padding:22px 14px 40px}.header-row{display:block}h1{font-size:26px}.source{margin-left:0}.probabilities{gap:5px}.probability{padding:8px}.probability strong{font-size:22px}.card{padding:16px}.experiments{grid-template-columns:1fr 1fr}.training{gap:6px}.training button{font-size:12px;padding:7px}.features-main{display:block}}
+</style>
+</head>
+<body><main>
+<header class="header-row"><div><div class="eyebrow">XIAOGUO / LEARNING LAB</div><h1>亲眼看看，它怎样学会选择</h1><p>改变情境、给出反馈，再用对照实验检查学到的东西。</p></div><span class="badge">独立实验副本 · 不改变桌面小果</span></header>
+<div class="toolbar">
+<label for="seed">随机种子</label><input id="seed" type="number" min="0" max="2147483647" value="42">
+<button id="reset-fresh">新建空白实验脑</button><button id="reset-pet" title="从小果的右键菜单打开，才会提供它当时的网络副本">使用打开时的小果副本</button>
+<span id="source" class="source">正在连接本机实验室…</span>
+</div>
+<div id="status" class="status" role="status" aria-live="polite"></div>
+<section class="layout">
+<div class="card"><h2>1. 给它一个情境</h2><div class="preset-row">
+<button data-preset="tired">疲劳安静</button><button data-preset="lively">活力好奇</button><button data-preset="social">需要互动</button>
+</div><div id="features-main" class="features-main"></div><details><summary>调整其余环境特征</summary><div id="features-extra" style="margin-top:12px"></div></details>
+<p class="small">移动滑块只改变输入，不会训练。每个数值与其互补值共同组成 24 维输入。</p></div>
+<div class="card"><h2>2. 给反馈，观察倾向变化</h2><div id="probabilities" class="probabilities"></div>
+<div class="training"><label for="action">目标行动</label><select id="action"><option value="rest">休息</option><option value="wander">探索</option><option value="approach">靠近</option><option value="play">玩耍</option></select>
+<button id="reward" class="primary">奖励一次 +1</button><button id="penalty">负反馈一次 −1</button><button id="train20">连续奖励 20 次</button></div>
+<p id="update-count" class="small"></p>
+<canvas id="history-chart" class="chart" aria-label="最近训练过程中四种行动倾向的变化"></canvas><div id="history-legend" class="legend"></div>
+<div class="toolbar" style="margin:8px 0"><button id="sample">试选 100 次</button><span id="sample-result" class="sample-result"></span></div>
+<p class="small">曲线是模型概率，抽样次数会波动。更换情境会重画曲线，已经学到的权重保留。</p>
+<div class="heading-line section-space"><h3 style="margin:0">真正参与这次响应的单元</h3><span id="active-count" class="small"></span></div>
+<canvas id="neurons" aria-label="稀疏扩展层活跃单元，绿色为本次非零激活"></canvas>
+</div></section>
+<section class="card section-space"><h2>3. 用对照实验检验能力</h2><p class="small" style="margin-bottom:15px">每项从当前实验脑复制后运行，保留对照，不修改上方手动训练的模型。自动实验使用内置合成情境，滑块用于上方手动试验。</p>
+<div class="experiments">
+<button class="experiment" data-experiment="association"><strong>情境学习</strong><span>同一个脑，能否在疲劳与活跃时学会不同选择？</span></button>
+<button class="experiment" data-experiment="reversal"><strong>奖励反转</strong><span>原来奖励的动作变了，它会调整，还是坚持旧习惯？</span></button>
+<button class="experiment" data-experiment="noise"><strong>陌生情境与抗噪</strong><span>输入略有变化时，学过的选择还能保持多少？</span></button>
+<button class="experiment" data-experiment="interference"><strong>新旧习惯干扰</strong><span>学习相似的新情境，会不会覆盖旧偏好？复习有用吗？</span></button>
+<button class="experiment" data-experiment="sensitivity"><strong>特征敏感性</strong><span>只改一个输入，哪些变化最容易影响选择？</span></button>
+</div></section>
+<section id="result" class="card section-space" hidden>
+<div class="result-head"><h2 id="result-title" style="margin:0"></h2><button id="export">保存实验报告</button></div>
+<p id="result-description"></p><p id="result-summary" style="color:var(--ink)"></p>
+<div id="result-metrics" class="result-metrics"></div>
+<canvas id="result-chart" class="chart result-chart" aria-label="自动实验比较曲线"></canvas><div id="result-legend" class="legend"></div>
+<div id="result-table" class="table-scroll"></div><ul id="result-notes" class="notes"></ul>
+<p id="result-time" class="small"></p>
+</section>
+<footer>实验模型只在本次会话中保留，可导出结果。学习、反转和抗噪实验不检验主观意识，也不代表真实环境中的任务表现。</footer>
+</main>
+<script id="boot" type="application/json">__BOOT__</script>
+<script>
+"use strict";
+const {token} = JSON.parse(document.getElementById('boot').textContent);
+const $ = id => document.getElementById(id);
+const COLORS = ['#237e60','#ce9038','#548cc8','#b77593','#929c73','#7d6db0'];
+let state=null, busy=false, result=null, resultOrigin=null, controlsBuilt=false;
+const format=(value,type)=>type==='pp' ? (Number(value)*100).toFixed(2)+' 个百分点' : type==='percent' ? (Number(value)*100).toFixed(2)+'%' : type==='number' ? Number(value).toLocaleString('zh-CN',{maximumFractionDigits:4}) : String(value);
+function status(text,error=false){$('status').textContent=text;$('status').classList.toggle('error',error);}
+function setBusy(value){busy=value;document.querySelectorAll('button,input,select').forEach(el=>el.disabled=value);if(!value&&state)$('reset-pet').disabled=!state.can_copy_pet;}
+async function request(path,payload){
+  const response=await fetch('/api/'+path,{method:payload===undefined?'GET':'POST',headers:{'X-Lab-Token':token,...(payload===undefined?{}:{'Content-Type':'application/json'})},body:payload===undefined?undefined:JSON.stringify(payload)});
+  const data=await response.json();if(!response.ok)throw new Error(data.error||'请求失败');return data;
+}
+async function command(path,payload,message){
+  if(busy)return;setBusy(true);status(message||'正在计算…');
+  try{const data=await request(path,payload);if(data.state)renderState(data.state);status('已完成 · 实验副本已更新，桌面小果保持原样');return data;}
+  catch(error){status(error.message+'。如果连接已断开，请重新打开实验室。',true);}
+  finally{setBusy(false);}
+}
+function canvasSetup(canvas){
+  const ratio=Math.min(window.devicePixelRatio||1,2),width=Math.max(250,canvas.clientWidth),height=parseFloat(getComputedStyle(canvas).height)||200;
+  canvas.width=Math.round(width*ratio);canvas.height=Math.round(height*ratio);
+  const ctx=canvas.getContext('2d');ctx.scale(ratio,ratio);return {ctx,width,height};
+}
+function chart(canvas,legend,series,xLabel='',yLabel='行动倾向'){
+  const {ctx,width,height}=canvasSetup(canvas);ctx.clearRect(0,0,width,height);
+  legend.replaceChildren();series.forEach((line,i)=>{const item=document.createElement('span');item.style.setProperty('--c',COLORS[i%COLORS.length]);item.textContent=line.name;legend.append(item);});
+  if(!series.length)return;
+  const all=series.flatMap(line=>line.points),minX=Math.min(...all.map(p=>p[0]));
+  const lastX=Math.max(...all.map(p=>p[0])),maxX=lastX===minX?minX+1:lastX;
+  const left=44,top=15,bottom=32,right=14,w=width-left-right,h=height-top-bottom;
+  ctx.font='11px system-ui';ctx.fillStyle='#748577';ctx.strokeStyle='#e4eade';ctx.lineWidth=1;
+  for(let tick=0;tick<=4;tick++){const v=tick/4,y=top+h*(1-v);ctx.beginPath();ctx.moveTo(left,y);ctx.lineTo(left+w,y);ctx.stroke();ctx.fillText(Math.round(v*100)+'%',3,y+4);}
+  ctx.fillText(String(minX),left,height-12);ctx.fillText(String(maxX),left+w-18,height-12);
+  ctx.fillText(xLabel,width/2-30,height-10);
+  series.forEach((line,i)=>{ctx.strokeStyle=COLORS[i%COLORS.length];ctx.lineWidth=2;ctx.beginPath();line.points.forEach(([x,y],j)=>{const px=left+w*(x-minX)/(maxX-minX),py=top+h*(1-Math.max(0,Math.min(1,y)));j?ctx.lineTo(px,py):ctx.moveTo(px,py);});ctx.stroke();if(line.points.length===1){const [x,y]=line.points[0];ctx.fillStyle=ctx.strokeStyle;ctx.beginPath();ctx.arc(left+w*(x-minX)/(maxX-minX),top+h*(1-y),3,0,Math.PI*2);ctx.fill();}});
+}
+function drawNeurons(){
+  if(!state)return;const {ctx,width,height}=canvasSetup($('neurons')),columns=32,rows=Math.ceil(state.width/columns),active=new Set(state.active);
+  ctx.clearRect(0,0,width,height);
+  for(let i=0;i<state.width;i++){ctx.fillStyle=active.has(i)?'#258561':'#dce6d6';ctx.fillRect((i%columns)*width/columns+1,Math.floor(i/columns)*height/rows+1,width/columns-2,height/rows-2);}
+  $('active-count').textContent=state.active.length+' / '+state.width+' 个活跃（上限 '+state.k+'）';
+}
+function buildControls(s){
+  s.feature_labels.forEach((label,i)=>{
+    const wrapper=document.createElement('div');wrapper.className='feature';
+    const head=document.createElement('div');head.className='feature-head';
+    const text=document.createElement('label');text.htmlFor='feature-'+i;text.textContent=label;
+    const value=document.createElement('output');value.id='value-'+i;value.htmlFor='feature-'+i;
+    head.append(text,value);
+    const input=document.createElement('input');input.type='range';input.id='feature-'+i;input.min=0;input.max=100;input.step=1;
+    input.oninput=()=>value.textContent=input.value+'%';
+    input.onchange=()=>command('context',{values:s.feature_labels.map((_,n)=>Number($('feature-'+n).value)/100)},'正在检查新情境…');
+    wrapper.append(head,input);$(i<6?'features-main':'features-extra').append(wrapper);
+  });
+  s.actions.forEach((action,i)=>{
+    const card=document.createElement('div');card.className='probability';
+    const label=document.createElement('span');label.textContent=s.action_labels[action];
+    const value=document.createElement('strong');value.id='prob-'+action;value.style.color=COLORS[i];
+    const bar=document.createElement('div');bar.className='bar';const fill=document.createElement('div');fill.className='fill';fill.id='fill-'+action;fill.style.background=COLORS[i];bar.append(fill);
+    card.append(label,value,bar);$('probabilities').append(card);
+  });
+  controlsBuilt=true;
+}
+function renderState(s){
+  state=s;if(!controlsBuilt)buildControls(s);
+  $('source').textContent=s.source;
+  s.base.forEach((value,i)=>{$('feature-'+i).value=Math.round(value*100);$('value-'+i).textContent=Math.round(value*100)+'%';});
+  s.actions.forEach(action=>{$('prob-'+action).textContent=(s.probabilities[action]*100).toFixed(1)+'%';$('fill-'+action).style.width=s.probabilities[action]*100+'%';});
+  $('update-count').textContent='本次手动训练 '+s.local_updates+' 次 · 模型累计更新 '+s.total_updates+' 次'+(s.last_update?' · 最近奖励预测误差 '+s.last_update.error.toFixed(3):'');
+  drawNeurons();
+  chart($('history-chart'),$('history-legend'),s.actions.map(action=>({name:s.action_labels[action],points:s.history.map(point=>[point.step,point.probabilities[action]])})),'训练次数');
+  $('sample-result').textContent='';
+  updateResultCaption();
+}
+function updateResultCaption(){
+  if(!result||!resultOrigin)return;
+  $('result-time').textContent='计算 '+result.elapsed_seconds.toFixed(2)+' 秒 · 起点：'+resultOrigin.source+'，手动训练 '+resultOrigin.manual_updates+' 次。'+
+    (state.experiment_matches_current?'此实验未改动手动模型。':'当前情境或模型已变化，以下保留为历史实验结果。');
+}
+function renderExperiment(data,origin){
+  result=data;resultOrigin=origin;$('result').hidden=false;$('result-title').textContent=data.title;
+  $('result-description').textContent=data.description;$('result-summary').textContent=data.summary;
+  $('result-metrics').replaceChildren();
+  data.metrics.forEach(metric=>{const card=document.createElement('div');card.className='metric';const value=document.createElement('strong');value.textContent=format(metric.value,metric.format);const label=document.createElement('span');label.textContent=metric.label;card.append(value,label);$('result-metrics').append(card);});
+  $('result-chart').hidden=!data.chart.series.length;
+  if(data.chart.series.length)chart($('result-chart'),$('result-legend'),data.chart.series,data.chart.x_label,data.chart.y_label);
+  else $('result-legend').replaceChildren();
+  const table=document.createElement('table'),thead=document.createElement('thead'),heading=document.createElement('tr');
+  data.table.columns.forEach(col=>{const th=document.createElement('th');th.textContent=col.label;heading.append(th);});thead.append(heading);table.append(thead);
+  const tbody=document.createElement('tbody');
+  data.table.rows.forEach(row=>{const tr=document.createElement('tr');data.table.columns.forEach(col=>{const td=document.createElement('td');td.textContent=format(row[col.key],col.format);tr.append(td);});tbody.append(tr);});table.append(tbody);
+  $('result-table').replaceChildren(table);$('result-notes').replaceChildren();
+  data.notes.forEach(note=>{const li=document.createElement('li');li.textContent=note;$('result-notes').append(li);});
+  updateResultCaption();
+}
+document.querySelectorAll('[data-preset]').forEach(button=>button.onclick=()=>command('context',{values:state.presets[button.dataset.preset]},'正在切换情境…'));
+async function reset(source){const data=await command('reset',{source,seed:Number($('seed').value)},'正在新建实验副本…');if(data){result=null;resultOrigin=null;$('result').hidden=true;document.querySelectorAll('.experiment').forEach(b=>b.classList.remove('selected'));}}
+$('reset-fresh').onclick=()=>reset('fresh');$('reset-pet').onclick=()=>reset('pet');
+$('reward').onclick=()=>command('train',{action:$('action').value,reward:1,steps:1},'正在学习这次正反馈…');
+$('penalty').onclick=()=>command('train',{action:$('action').value,reward:-1,steps:1},'正在学习这次负反馈…');
+$('train20').onclick=()=>command('train',{action:$('action').value,reward:1,steps:20},'正在连续练习 20 次…');
+$('sample').onclick=async()=>{const data=await command('sample',{count:100},'正在抽样选择…');if(data)$('sample-result').textContent=state.actions.map(action=>state.action_labels[action]+' '+data.sample[action]+' 次').join(' / ');};
+document.querySelectorAll('[data-experiment]').forEach(button=>button.onclick=async()=>{
+  const data=await command('experiment',{id:button.dataset.experiment,seed:Number($('seed').value)},'正在运行 '+button.querySelector('strong').textContent+'，通常需要几秒…');
+  if(data){document.querySelectorAll('.experiment').forEach(b=>b.classList.toggle('selected',b===button));renderExperiment(data.experiment,data.experiment_origin);$('result').scrollIntoView({behavior:'auto',block:'start'});}
+});
+$('export').onclick=async()=>{if(busy)return;setBusy(true);try{const data=await request('export-report',{});status('报告已保存到：'+data.saved_to);$('result-time').textContent+=' 报告已保存到项目 lab_reports 文件夹。';}catch(error){status(error.message,true);}finally{setBusy(false);}};
+window.addEventListener('resize',()=>{if(state){drawNeurons();chart($('history-chart'),$('history-legend'),state.actions.map(action=>({name:state.action_labels[action],points:state.history.map(p=>[p.step,p.probabilities[action]])})),'训练次数');}if(result&&result.chart.series.length)chart($('result-chart'),$('result-legend'),result.chart.series,result.chart.x_label);});
+(async()=>{setBusy(true);try{const data=await request('state');renderState(data.state);status('实验室已就绪。先选一个情境，再给某个行动奖励。');}catch(error){status(error.message,true);}finally{setBusy(false);}})();
+</script>
+</body></html>

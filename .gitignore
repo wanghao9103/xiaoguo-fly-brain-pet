@@ -1,0 +1,17 @@
+__pycache__/
+qa/
+lab_reports/
+*.pyc
+dist/
+build/
+.venv/
+venv/
+.env
+.env.*
+!.env.example
+*.lnk
+*.log
+*.lock
+*.tmp
+memory*.json
+display.json
