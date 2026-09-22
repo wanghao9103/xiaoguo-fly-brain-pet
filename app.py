@@ -9,6 +9,7 @@ import math
 import os
 from pathlib import Path
 import random
+import queue
 import sys
 import time
 import webbrowser
@@ -113,6 +114,7 @@ class DesktopPet:
         self.closing = False
         self.panel = None
         self.lab_service = None
+        self.board_events = queue.SimpleQueue()
         self.save_status = "本地记忆已就绪"
         self.dirty_error = False
         self.menu = tk.Menu(self.root, tearoff=False, font=("Microsoft YaHei UI", 10))
@@ -124,6 +126,7 @@ class DesktopPet:
         self.menu.add_command(label="状态与学习面板", command=self.show_panel)
         self.menu.add_command(label="看看它这次的选择", command=self.explain_decision)
         self.menu.add_command(label="神经网络实验室（独立副本）", command=self.open_lab)
+        self.menu.add_command(label="和小果下棋：五子棋 / 象棋", command=self.open_chess)
         self.menu.add_command(label="暂停 / 继续", command=lambda: self.toggle("paused"))
         self.menu.add_command(label="原地陪伴 / 自由活动", command=lambda: self.toggle("stay"))
         self.size_var = tk.StringVar(value=self.size_name)
@@ -199,6 +202,12 @@ class DesktopPet:
         if self.closing:
             return
         now = time.monotonic()
+        for _ in range(8):
+            try:
+                board_event = self.board_events.get_nowait()
+            except queue.Empty:
+                break
+            self.handle_board_event(board_event)
         dt = min(.2, max(0, now - self.last_tick))
         self.last_tick = now
         self.elapsed += dt
@@ -659,11 +668,32 @@ class DesktopPet:
         try:
             if self.lab_service is None:
                 from lab import LabService
-                self.lab_service = LabService(initial=self.engine.brain.to_dict()).start()
+                self.lab_service = LabService(initial=self.engine.brain.to_dict(), on_game_event=self.board_events.put).start()
             webbrowser.open(self.lab_service.url)
         except Exception:
             logging.exception("Could not open learning laboratory")
             messagebox.showerror("实验室暂未打开", "实验室启动失败，小果的学习和记忆没有改动。可查看 app.log。", parent=self.root)
+
+    def open_chess(self):
+        self.cancel_single_click()
+        try:
+            if self.lab_service is None:
+                from lab import LabService
+                self.lab_service = LabService(initial=self.engine.brain.to_dict(), on_game_event=self.board_events.put).start()
+            webbrowser.open(self.lab_service.url + "games")
+        except Exception:
+            logging.exception("Could not open chess table")
+            messagebox.showerror("棋桌暂未打开", "棋桌启动失败，原有记忆没有改动。", parent=self.root)
+
+    def handle_board_event(self, event):
+        self.feedback_message = event["message"]
+        self.feedback_until = time.monotonic() + 4
+        self.interaction.react("praise" if event["kind"] == "finish" else "play", 2.0)
+        if event["kind"] in ("start", "human_move"):
+            self.engine.body["idle"] = 0.0
+        if event["kind"] in ("start", "finish"):
+            self.engine.remember("board_game", event["message"])
+            self.save()
 
     def update_panel(self):
         if self.panel is None:

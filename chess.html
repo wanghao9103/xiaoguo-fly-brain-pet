@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>小果的棋桌 · 五子棋与中国象棋</title>
+<style>
+:root{color-scheme:light;--ink:#24483d;--green:#3e7655;--muted:#65756c;--line:#dbe4d9}
+*{box-sizing:border-box}body{margin:0;background:#f4f6ef;color:var(--ink);font:15px/1.6 "Microsoft YaHei",sans-serif}
+button,select{font:inherit;color:inherit}button{cursor:pointer;border:1px solid var(--line);background:#fffdf7;border-radius:12px;padding:9px 16px}
+button:hover:not(:disabled){border-color:#719873;background:#edf4e6}button:focus-visible,select:focus-visible{outline:3px solid #78a5c9;outline-offset:3px}
+button:disabled{cursor:default;opacity:.45}.primary,button[aria-pressed=true]{background:var(--green);border-color:var(--green);color:white}
+header{max-width:1160px;margin:auto;padding:28px 28px 20px;display:flex;justify-content:space-between;align-items:center;gap:20px}
+h1{font-size:27px;letter-spacing:1px;margin:0}p{margin:0}header p,.muted{color:var(--muted)}.eyebrow{font-size:11px;letter-spacing:2px;color:#798f74}
+.tabs{display:flex;gap:8px}main{max-width:1160px;margin:auto;padding:0 28px 32px;display:grid;grid-template-columns:minmax(360px,1fr) 320px;gap:24px}
+.surface{background:#fffdf7;border:1px solid var(--line);border-radius:24px;padding:20px;box-shadow:0 6px 20px #324c3410}
+.board-top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}.board-top h2{font-size:17px;margin:0}.badge{font-size:12px;border-radius:20px;background:#e9efdf;padding:4px 10px;white-space:nowrap}
+#board{position:relative;width:100%;max-width:600px;aspect-ratio:1;margin:auto;background:#e9cca0;border-radius:14px;box-shadow:inset 0 0 50px #a66e2726;border:1px solid #c9a575}
+#board.xiangqi{aspect-ratio:600/660;background:#efd5ab}#board svg{display:block;width:100%;height:100%;position:absolute;pointer-events:none}
+.point{position:absolute;border:0;border-radius:50%;padding:0;transform:translate(-50%,-50%);display:grid;place-items:center;background:transparent;opacity:1!important;line-height:1}
+.point:not(.black):not(.white):not(.piece):hover:not(:disabled){background:#fcfff77a;border:0}.point.black{background:radial-gradient(circle at 35% 28%,#58615a,#1b2725 70%);box-shadow:1px 3px 4px #0005}
+.point.white{background:radial-gradient(circle at 35% 28%,#fff,#e8e8d8 70%);box-shadow:1px 3px 4px #0004;border:1px solid #b8b9aa}
+.point.piece{background:radial-gradient(circle at 40% 25%,#fff1ce,#e5b870);border:2px solid currentColor;box-shadow:1px 3px 3px #7747225c;font-weight:700;font-family:"KaiTi","STKaiti",serif}
+.point.red{color:#a6352b}.point.dark{color:#273c38}.point.last{outline:3px solid #d9902b;outline-offset:2px}.point.selected,.point.won{outline:3px solid #3a936c;outline-offset:2px}
+.point.target:after{content:"";position:absolute;width:28%;height:28%;background:#318f67bc;border:1px solid white;border-radius:50%}.point.piece.target:after{width:100%;height:100%;background:transparent;border:3px solid #318f67}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}.actions button{flex:1;white-space:nowrap}.hint{font-size:12px;color:var(--muted);margin-top:12px;min-height:20px}
+aside{display:flex;flex-direction:column;gap:16px}.pet-card{background:#edf3e5}.pet-line{display:flex;align-items:center;gap:10px}.pet-art{width:88px;height:80px;flex:none}.pet-card h2{margin:0;font-size:19px}.speech{margin-top:12px;padding:13px;background:#fffdf7;border-radius:12px;font-size:14px}
+h3{font-size:15px;margin:0 0 12px}.settings{display:grid;grid-template-columns:1fr 1fr;gap:12px}label{display:block;font-size:13px}select{width:100%;margin-top:5px;background:#fff;border:1px solid var(--line);padding:8px;border-radius:9px}
+.toggle{display:flex;gap:8px;align-items:center;font-weight:600;margin:14px 0 8px}.toggle input{accent-color:var(--green);width:17px;height:17px}.numbers{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}.number{padding:10px;background:#f1f4e9;border-radius:12px}.number strong{font-size:24px;display:block;line-height:1.3}.number span{font-size:11px;color:var(--muted)}
+#coach{width:100%}.small{font-size:12px;color:var(--muted)}#lesson{padding-top:10px;font-size:13px;min-height:36px}.analysis{font-size:12px;line-height:1.9}.analysis strong{font-size:13px}.history{max-height:112px;overflow:auto;font-size:12px;color:var(--muted);white-space:pre-wrap}details{font-size:12px;color:var(--muted);margin-top:14px}summary{cursor:pointer}
+#error{max-width:1104px;margin:0 auto 15px;background:#fff1df;border:1px solid #d9b280;padding:12px 18px;border-radius:12px}#error:empty{display:none}
+@media(max-width:850px){main{grid-template-columns:1fr;max-width:650px;padding:0 16px 24px}header{max-width:650px;padding:20px 16px;align-items:flex-start}h1{font-size:23px}header p{font-size:12px}.tabs button{padding:8px 10px}aside{display:grid;grid-template-columns:1fr 1fr}.pet-card{grid-column:1/-1}.surface{padding:16px}.settings{gap:7px}}
+@media(max-width:520px){header{flex-wrap:wrap;gap:12px}aside{display:flex}.point.piece{border-width:1px}.actions button{font-size:13px;padding:9px}main{gap:14px}}
+</style>
+</head>
+<body>
+<header><div><div class="eyebrow">XIAOGUO · PLAY & LEARN</div><h1>和小果下一盘</h1><p>一张棋桌，一点陪伴，慢慢积累棋步记忆。</p></div>
+<nav class="tabs" aria-label="棋种"><button id="gomoku" aria-pressed="true">五子棋</button><button id="xiangqi" aria-pressed="false">中国象棋</button></nav></header>
+<div id="error" role="alert"></div>
+<main>
+<section class="surface">
+<div class="board-top"><h2 id="status" aria-live="polite">正在准备棋桌…</h2><span class="badge" id="side">你执黑</span></div>
+<div id="board" aria-label="棋盘"></div>
+<div class="actions"><button class="primary" id="new">重新开局</button><button id="undo">悔一回合</button><button id="resign">认输</button></div>
+<p class="hint" id="hint">点击交叉点落子。</p>
+<details><summary>这张棋桌的规则</summary><p>五子棋：15 × 15 自由规则，连成五子或以上即胜，不设禁手。中国象棋：遵守基础走法与将军规则，将死、困毙均判负。相同局面与行棋方出现三次，或达到 400 步，按休闲规则和棋；不裁决竞技长将、长捉。悔棋与重新开局会保留已经学到的评分。</p></details>
+</section>
+<aside>
+<section class="surface pet-card"><div class="pet-line">
+<svg class="pet-art" viewBox="0 0 130 110" aria-hidden="true"><g stroke="#426850" stroke-width="2"><ellipse cx="30" cy="40" rx="28" ry="17" fill="#dfede1" transform="rotate(20 30 40)"/><ellipse cx="100" cy="40" rx="28" ry="17" fill="#dfede1" transform="rotate(-20 100 40)"/><ellipse cx="65" cy="86" rx="28" ry="17" fill="#89b497"/><ellipse cx="65" cy="62" rx="39" ry="33" fill="#b9ddb2"/><path d="M48 32L38 14M81 32L92 14M29 76L12 82M100 76L118 82" fill="none"/><circle cx="37" cy="12" r="5" fill="#f0ca76"/><circle cx="93" cy="12" r="5" fill="#f0ca76"/><ellipse cx="49" cy="59" rx="8" ry="11" fill="#fffdf5"/><ellipse cx="82" cy="59" rx="8" ry="11" fill="#fffdf5"/><path d="M56 78Q65 88 75 78" fill="none"/></g><g fill="#28493a"><ellipse cx="51" cy="60" rx="3" ry="5"/><ellipse cx="80" cy="60" rx="3" ry="5"/></g></svg>
+<div><h2>小果在这儿</h2><p class="small">休闲棋友 · 一起练习</p></div></div><p class="speech" id="speech" aria-live="polite">来下一盘吧，我准备好了。</p></section>
+<section class="surface"><h3>下一局怎么下</h3><div class="settings"><label>你的执子<select id="human"><option value="1">先手 · 黑 / 红</option><option value="-1">后手 · 白 / 黑</option></select></label><label>搜索水平<select id="depth"><option value="1">轻松陪练</option><option value="2" selected>认真想想</option></select></label></div>
+<label class="toggle"><input id="learning" type="checkbox" checked>开启棋步学习与记忆</label>
+<p class="small">从搜索示范与终局反馈学习，保存到本机。关闭后使用搜索下棋，暂停训练与记忆评分参与选棋。</p>
+<div class="numbers"><div class="number"><strong id="teacher-count">0</strong><span>示范样本训练次数</span></div><div class="number"><strong id="outcome-count">0</strong><span>终局样本训练次数</span></div></div>
+<button id="coach">看示范并学习 5 轮</button><div id="lesson" aria-live="polite" class="small">保持棋盘不动，观察学习前后的评分误差。</div>
+<p class="small" id="saved">已记住 0 局完整棋谱</p></section>
+<section class="surface"><h3>小果这一步怎么想</h3><div id="analysis" class="analysis">等小果落子后，这里会展示搜索评分与记忆评分。</div><details><summary>它学到了什么？</summary><p>12 个棋步特征扩展到 384 个稀疏单元，每次激活 24 个。搜索给出示范评分，胜负给出延迟反馈；学习后的评分参与候选选择。规则由程序保证，评分不是胜率，也不代表已经学会全部棋理或棋力必然提高。</p></details>
+<details><summary>本局落子记录</summary><div id="history" class="history">尚未落子</div></details></section>
+</aside>
+</main>
+<script id="boot" type="application/json">__BOOT__</script>
+<script>
+"use strict";
+const token=JSON.parse(document.getElementById("boot").textContent).token;
+const $=id=>document.getElementById(id), ns="http://www.w3.org/2000/svg";
+let game=null, selected=null, busy=false;
+const pieceNames={K:"帅",R:"车",N:"马",B:"相",A:"仕",C:"炮",P:"兵",k:"将",r:"车",n:"马",b:"象",a:"士",c:"炮",p:"卒"};
+function svgEl(tag,attrs,parent){const el=document.createElementNS(ns,tag);Object.entries(attrs).forEach(([k,v])=>el.setAttribute(k,v));parent.appendChild(el);return el;}
+function square(r,c){return String.fromCharCode(65+c)+(game.kind==="gomoku"?15-r:10-r);}
+function moveText(m){return m.length===2?square(m[0],m[1]):square(m[0],m[1])+" → "+square(m[2],m[3]);}
+async function request(path,data){
+ const response=await fetch("/api/games/"+path,{method:data?"POST":"GET",headers:{"X-Lab-Token":token,"Content-Type":"application/json"},body:data?JSON.stringify(data):undefined});
+ const result=await response.json();if(!response.ok)throw Error(result.error||"棋桌暂时没有回应");return result;
+}
+async function action(name,data={}){
+ if(busy||!game)return;busy=true;$("error").textContent="";controls();
+ $("speech").textContent=name==="coach"?"让我看看示范，记住这些棋步…":"小果正在想下一步…";
+ try{game=(await request(name,{...data,revision:game.revision})).game;selected=null;}
+ catch(e){$("error").textContent=e.message;try{game=(await request("state")).game;}catch(_){}}
+ finally{busy=false;render();}
+}
+function controls(){
+ ["gomoku","xiangqi","new","human","depth","learning"].forEach(id=>$(id).disabled=busy||!game);
+ $("undo").disabled=busy||!game||!game.can_undo;
+ $("resign").disabled=busy||!game||game.winner!==null;
+ $("coach").disabled=busy||!game||game.winner!==null||!game.learning;
+ document.querySelectorAll(".point").forEach(el=>el.disabled=busy||game.winner!==null);
+}
+function newGame(kind){action("new",{kind,human_side:Number($("human").value),depth:Number($("depth").value),learning:$("learning").checked});}
+function board(){
+ const box=$("board"),gomoku=game.kind==="gomoku",rows=gomoku?15:10,cols=gomoku?15:9,h=gomoku?600:660,pad=gomoku?20:30,dx=gomoku?40:67.5,dy=gomoku?40:600/9;
+ box.replaceChildren();box.className=gomoku?"":"xiangqi";
+ const svg=svgEl("svg",{viewBox:"0 0 600 "+h},box);
+ const line=(x1,y1,x2,y2)=>svgEl("line",{x1,y1,x2,y2,stroke:"#9b7545","stroke-width":1.2},svg);
+ for(let r=0;r<rows;r++)line(pad,pad+r*dy,600-pad,pad+r*dy);
+ for(let c=0;c<cols;c++){
+  const x=pad+c*dx;
+  if(gomoku||c===0||c===8)line(x,pad,x,h-pad);
+  else{line(x,pad,x,pad+4*dy);line(x,pad+5*dy,x,h-pad);}
+ }
+ if(gomoku){[[3,3],[3,11],[7,7],[11,3],[11,11]].forEach(([r,c])=>svgEl("circle",{cx:pad+c*dx,cy:pad+r*dy,r:3,fill:"#89633b"},svg));}
+ else{
+  [0,7].forEach(r=>{line(pad+3*dx,pad+r*dy,pad+5*dx,pad+(r+2)*dy);line(pad+5*dx,pad+r*dy,pad+3*dx,pad+(r+2)*dy);});
+  const text=svgEl("text",{x:300,y:337,"text-anchor":"middle",fill:"#967242","font-size":25,"letter-spacing":24},svg);text.textContent="楚河  漢界";
+ }
+ const flipped=!gomoku&&game.human_side===-1;
+ const last=game.last_move,targets=selected?game.legal_moves.filter(m=>m[0]===selected[0]&&m[1]===selected[1]):[];
+ for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
+  const v=game.board[r][c],empty=gomoku?v===0:v===".",b=document.createElement("button");
+  const vr=flipped?rows-1-r:r,vc=flipped?cols-1-c:c;
+  b.className="point";b.style.left=(pad+vc*dx)/6+"%";b.style.top=(pad+vr*dy)/h*100+"%";b.style.width=(gomoku?5.6:8.6)+"%";b.style.aspectRatio="1";
+  if(!empty){b.classList.add(gomoku?(v===1?"black":"white"):"piece");if(!gomoku){b.classList.add(v===v.toUpperCase()?"red":"dark");b.textContent=pieceNames[v];b.style.fontSize="clamp(17px,2.6vw,30px)";}}
+  if(last&&last[last.length-2]===r&&last[last.length-1]===c)b.classList.add("last");
+  if(selected&&selected[0]===r&&selected[1]===c)b.classList.add("selected");
+  const target=targets.some(m=>m[2]===r&&m[3]===c);if(target)b.classList.add("target");
+  if((game.winning_line||[]).some(p=>p[0]===r&&p[1]===c))b.classList.add("won");
+  const name=gomoku?(empty?"落子":v===1?"黑子":"白子"):(empty?"空位":(v===v.toUpperCase()?"红":"黑")+pieceNames[v]);
+  b.setAttribute("aria-label",name+" "+square(r,c)+(target?"，可走":""));b.title=b.getAttribute("aria-label");
+  b.onclick=()=>{
+   if(busy||game.winner!==null)return;
+   if(gomoku){if(empty)action("move",{move:[r,c]});return;}
+   if(target){action("move",{move:[...selected,r,c]});return;}
+   if(!empty&&(v===v.toUpperCase()?1:-1)===game.human_side){selected=selected&&selected[0]===r&&selected[1]===c?null:[r,c];board();controls();}
+   else{selected=null;board();controls();}
+  };
+  box.appendChild(b);
+ }
+}
+function render(){
+ if(!game)return;const gomoku=game.kind==="gomoku",ended=game.winner!==null;
+ $("gomoku").setAttribute("aria-pressed",gomoku);$("xiangqi").setAttribute("aria-pressed",!gomoku);
+ $("side").textContent="你执"+(gomoku?(game.human_side===1?"黑":"白"):(game.human_side===1?"红":"黑"))+" · 第 "+(game.history.length+1)+" 步";
+ const result=game.winner===0?"这一局，握手言和":game.winner===game.human_side?"你赢啦！":"小果赢了这一局";
+ $("status").textContent=ended?result:(game.check?"将军！请应将":"轮到你了");
+ $("speech").textContent=ended?(game.winner===game.human_side?"这盘下得真好，我会记住这次经验。":game.winner===0?"势均力敌！一起再下一盘吧。":"谢谢你陪我下棋，再来一局吗？"):(game.check?"要保护好将帅哦。":game.analysis?"我落好啦，轮到你想一想。":"来下一盘吧，我准备好了。");
+ $("hint").textContent=ended?"本局已记录。重新开局会保留棋步记忆。":gomoku?"点击交叉点落子；金圈标记上一步，绿圈标记成五。":"先选你的棋子，再点绿色落点；金圈标记上一步。";
+ $("learning").checked=game.learning;
+ $("teacher-count").textContent=game.memory.teacher_examples.toLocaleString();$("outcome-count").textContent=game.memory.outcome_examples.toLocaleString();
+ $("saved").textContent="已记住 "+game.saved_games+" 局完整棋谱 · 两种棋合计保留最近 30 局";
+ if(game.coach){const c=game.coach;$("lesson").textContent="示范误差 "+c.before.toFixed(4)+" → "+c.after.toFixed(4)+"；建议 "+moveText(c.suggestion)+"。"+c.note;}
+ else $("lesson").textContent=game.learning?"保持棋盘不动，观察学习前后的评分误差。":"学习已暂停；已学记忆仍保留。";
+ const a=game.analysis;
+ $("analysis").replaceChildren();
+ if(a){const strong=document.createElement("strong");strong.textContent=moveText(a.move)+" · "+({tactical:"优先处理胜负威胁",hybrid:"搜索 + 棋步记忆",search:"搜索选棋"}[a.source]);$("analysis").appendChild(strong);
+ const p=document.createElement("p");p.textContent="搜索相对评分 "+a.teacher_value.toFixed(3)+" · 记忆评分 "+a.neural_before.toFixed(3)+" → "+a.neural_after.toFixed(3);$("analysis").appendChild(p);
+ const note=document.createElement("p");note.className="small";note.textContent=a.source==="search"?"本步仅使用搜索；记忆评分未参与选棋，也未进行训练。":a.source==="tactical"?"先保证立即胜负威胁的处理，再在可用棋步中比较记忆评分。":"前值参与本次选棋，后值是示范训练后的变化；这不是胜率。";$("analysis").appendChild(note);}
+ else $("analysis").textContent="等小果落子后，这里会展示搜索评分与记忆评分。";
+ $("history").textContent=game.history.length?game.history.map((entry,i)=>(i+1)+". "+(entry.side===game.human_side?"你":"小果")+" "+moveText(entry.move)).join("\n"):"尚未落子";
+ if(game.warning)$("error").textContent=game.warning;
+ board();controls();
+}
+$("gomoku").onclick=()=>newGame("gomoku");$("xiangqi").onclick=()=>newGame("xiangqi");
+$("new").onclick=()=>newGame(game.kind);$("undo").onclick=()=>action("undo");$("resign").onclick=()=>action("resign");$("coach").onclick=()=>action("coach");
+$("learning").onchange=()=>action("learning",{enabled:$("learning").checked});
+async function init(){controls();try{game=(await request("state")).game;$("human").value=game.human_side;$("depth").value=game.depth;render();}catch(e){$("error").textContent=e.message;$("status").textContent="棋桌暂时无法打开";}}
+init();
+</script>
+</body></html>

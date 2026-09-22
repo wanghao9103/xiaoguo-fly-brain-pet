@@ -6,6 +6,8 @@ import hashlib
 import hmac
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
+import logging
+import os
 from pathlib import Path
 import secrets
 import sys
@@ -145,12 +147,16 @@ class LabSession:
 
 
 class LabService:
-    def __init__(self, initial=None, port=0, report_dir=None):
+    def __init__(self, initial=None, port=0, report_dir=None, game_data_dir=None, on_game_event=None):
         self.session = LabSession(initial)
         self.report_dir = Path(report_dir) if report_dir is not None else ROOT / "lab_reports"
         self.token = secrets.token_urlsafe(32)
         self.last_seen = time.monotonic()
         self.stopping = False
+        self.games = None
+        self.games_guard = threading.Lock()
+        self.game_data_dir = Path(game_data_dir) if game_data_dir is not None else Path(os.environ.get("LOCALAPPDATA", str(Path.home()))) / "FlyBrainPet" / "chess"
+        self.on_game_event = on_game_event
         owner = self
 
         class Handler(BaseHTTPRequestHandler):
@@ -187,8 +193,8 @@ class LabService:
                 api = self.path.startswith("/api/")
                 if not self.allowed(api):
                     return
-                if self.path == "/":
-                    page = (ROOT / "lab.html").read_text(encoding="utf-8")
+                if self.path in ("/", "/games"):
+                    page = (ROOT / ("chess.html" if self.path == "/games" else "lab.html")).read_text(encoding="utf-8")
                     boot = json.dumps({"token": owner.token}, ensure_ascii=False).replace("<", "\\u003c")
                     body = page.replace("__BOOT__", boot).encode("utf-8")
                     self.send_response(200)
@@ -198,6 +204,13 @@ class LabService:
                     self.send_header("X-Frame-Options", "DENY")
                     self.end_headers()
                     self.wfile.write(body)
+                elif self.path == "/api/games/state":
+                    try:
+                        games = owner.get_games()
+                        with games.lock:
+                            self.send_json(200, {"game": games.snapshot()})
+                    except (RuntimeError, ValueError, OSError) as error:
+                        self.send_json(409, {"error": str(error)})
                 elif self.path == "/api/state":
                     with owner.session.lock:
                         self.send_json(200, {"state": owner.session.state()})
@@ -224,7 +237,9 @@ class LabService:
                     if not self.path.startswith("/api/"):
                         self.send_json(404, {"error": "未知操作"})
                         return
-                    if self.path == "/api/export-report":
+                    if self.path.startswith("/api/games/"):
+                        result = owner.get_games().command(self.path.removeprefix("/api/games/"), payload)
+                    elif self.path == "/api/export-report":
                         if payload != {}:
                             raise ValueError("保存报告不接受文件路径参数")
                         report = owner.session.export()
@@ -239,6 +254,8 @@ class LabService:
                     self.send_json(200, result)
                 except (ValueError, TypeError, KeyError, OverflowError) as error:
                     self.send_json(400, {"error": str(error)})
+                except RuntimeError as error:
+                    self.send_json(409, {"error": str(error)})
                 except Exception:
                     self.send_json(500, {"error": "实验执行失败，原小果数据未改动"})
 
@@ -253,26 +270,44 @@ class LabService:
         self.thread.start()
         return self
 
+    def get_games(self):
+        with self.games_guard:
+            if self.stopping:
+                raise RuntimeError("棋桌正在关闭，请重新打开。")
+            if self.games is None:
+                from board_games import GamesSession
+                self.games = GamesSession(self.game_data_dir, self.on_game_event)
+            return self.games
+
     def stop(self):
-        if self.stopping:
-            return
-        self.stopping = True
+        with self.games_guard:
+            if self.stopping:
+                return
+            self.stopping = True
         if self.thread is not None and self.thread.is_alive():
             self.server.shutdown()
             self.thread.join(timeout=2)
         self.server.server_close()
+        if self.games is not None:
+            try:
+                self.games.close()
+            except Exception:
+                logging.exception("Could not close chess memory cleanly")
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--port", type=int, default=0)
     parser.add_argument("--no-browser", action="store_true")
+    parser.add_argument("--games", action="store_true", help="Open the board-game page")
+    parser.add_argument("--game-data-dir", type=Path, help="Separate chess memory directory")
     args = parser.parse_args()
-    service = LabService(port=args.port).start()
+    service = LabService(port=args.port, game_data_dir=args.game_data_dir).start()
+    start_url = service.url + ("games" if args.games else "")
     if sys.stdout is not None:
-        print(f"LAB_URL={service.url}", flush=True)
+        print(f"LAB_URL={start_url}", flush=True)
     if not args.no_browser:
-        webbrowser.open(service.url)
+        webbrowser.open(start_url)
     try:
         while service.thread.is_alive():
             service.thread.join(timeout=1)

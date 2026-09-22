@@ -158,6 +158,16 @@ softmax + 8% 均匀探索混合
 
 教程：[学习实验室](docs/LEARNING_LAB.md)。
 
+## 和小果下棋并积累棋步记忆
+
+双击“启动棋桌.cmd”，或运行 python lab.py --games。重新启动桌宠后，右键菜单也提供“和小果下棋：五子棋 / 象棋”。从桌宠菜单打开时，落子与结果会让小果显示回应。
+
+支持五子棋、中国象棋、先后手、两档搜索、悔棋和重新开局。独立的果蝇式稀疏网络学习搜索老师的棋步评分与终局反馈，并参与选棋；两种棋分别保存权重。可点“看示范并学习 5 轮”观察实际评分误差变化。
+
+棋步学习与原来休息、探索等行为学习分开保存。关闭棋步学习会暂停训练和神经评分参与选棋，原记忆保留。当前为休闲陪练，不保证学习后棋力持续提高；象棋采用休闲重复判和，不裁决完整竞技长将长捉。
+
+操作、机制、存档与能力边界见 [棋桌指南](docs/CHESS.md)。
+
 ## 怎样验证学习
 
 在项目目录执行：
@@ -170,6 +180,7 @@ python verify_runtime.py
 
 - 原有 20 项核心检查、14 项小游戏与手势检查、11 项派生情绪检查，以及 4 项决策记录检查，共 49 项自动测试。
 - 学习实验室增加 10 项计算实验测试和 10 项隔离/HTTP/报告测试，累计 69 项。
+- 棋桌增加 36 项规则/战术测试、4 项稀疏记忆测试、13 项会话/HTTP/桌宠接线测试，累计 122 项。
 - verify_learning.py 使用合成情境验证学习机制，完全不访问真实宠物存档。
 - verify_runtime.py 使用临时目录验证 Tk 布局、实际回调、拖动不奖励和保存恢复；产生 qa/verification.json。
 - 宠物大小采用明确的像素尺寸，不再跟随 200% 系统缩放自动放大；状态面板仍尊重系统文字缩放。大小切换的额外检查证明学习参数保持不变。
@@ -203,6 +214,8 @@ python app.py --panel --data-dir "$env:TEMP\FlyBrainPet-Experiment"
 | verify_runtime.py | 使用临时存档的 Tk 组件检查 |
 | experiments.py / test_experiments.py | 五类合成对照实验及可复现性检查 |
 | lab.py / lab.html / test_lab.py | 本机实验页面、隔离模型、报告与 HTTP 验证 |
+| gomoku.py / xiangqi.py | 五子棋与象棋的合法规则、候选特征和搜索老师 |
+| chess_memory.py / board_games.py / chess.html | 独立棋步学习与记忆、人机回合、浏览器棋桌 |
 | 创建桌面快捷方式.ps1 | 为当前机器的 pythonw 和项目目录创建快捷方式 |
 
 移动项目目录后，重新运行快捷方式创建脚本，避免旧快捷方式仍指向原位置。
@@ -211,6 +224,7 @@ python app.py --panel --data-dir "$env:TEMP\FlyBrainPet-Experiment"
 
 - [结构与能力边界](docs/ARCHITECTURE.md)
 - [学习实验室操作与指标解释](docs/LEARNING_LAB.md)
+- [五子棋、象棋与果蝇式棋步学习](docs/CHESS.md)
 - [KCNet 研究](https://arxiv.org/abs/2108.07554)
 - [果蝇启发的相似性搜索](https://doi.org/10.1126/science.aam9868)
 
