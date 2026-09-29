@@ -42,7 +42,8 @@ def run(destination):
                     saved = Path(json.load(response)["saved_to"])
                 checks["report_exists"] = saved.is_file()
                 if report["frozen"]:
-                    checks["report_outside_bundle"] = saved.parent == Path(directory) / "FlyBrainPet" / "lab_reports"
+                    # macOS /var temporary paths resolve through /private/var.
+                    checks["report_outside_bundle"] = saved.parent == (Path(directory) / "FlyBrainPet" / "lab_reports").resolve()
             finally:
                 service.stop()
             checks["chess_saved"] = any((Path(directory) / "chess").glob("*.json"))
