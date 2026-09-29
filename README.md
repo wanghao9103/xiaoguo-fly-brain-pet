@@ -1,12 +1,60 @@
 # 小果 · 果蝇启发的桌面宠物
 
-**XiaoGuo — an offline Windows desktop pet with a fly-inspired sparse learning network.**
+**XiaoGuo — an offline desktop pet for Windows and macOS with a fly-inspired sparse learning network.**
 
-小果是一个在 Windows 桌面上运行的离线宠物原型。它有独立的透明悬浮窗口，会休息、探索、靠近鼠标和玩耍；用户互动会更新行动网络的权重，退出后保存状态、记忆和模型。
+小果是一个支持 Windows 和 macOS 构建的离线桌面宠物原型。它有独立的透明悬浮窗口，会休息、探索、靠近鼠标和玩耍；用户互动会更新行动网络的权重，退出后保存状态、记忆和模型。
 
 这是受果蝇蘑菇体启发的人工网络，不是真实连接组仿真。能学习行为偏好不等于证明有主观意识。
 
 ## 快速开始
+
+### 下载自动构建
+
+打开 [GitHub Actions 的 Build desktop apps](https://github.com/wanghao9103/xiaoguo-fly-brain-pet/actions/workflows/build.yml)，选择成功的运行，在 **Artifacts** 中下载对应平台的包。Actions 下载通常需要登录 GitHub；有版本发布后也可直接从 [Releases](https://github.com/wanghao9103/xiaoguo-fly-brain-pet/releases) 下载。
+
+| 包名 | 平台 | 解压后的入口 |
+| --- | --- | --- |
+| xiaoguo-windows-x64 | Windows x64 | 小果.exe |
+| xiaoguo-macos-arm64 | Apple Silicon（M 系列）Mac | 小果.app |
+| xiaoguo-macos-x64 | Intel Mac | 小果.app |
+
+Actions artifact 中包含应用 ZIP 和 SHA256 校验文件；先解压 artifact，再解压应用 ZIP。macOS 请保留完整 `.app`，可拖到“应用程序”后双击；右键、Control + 单击或底部“⋯”可打开菜单。Mac 版未使用 Apple Developer ID 签名及公证，首次打开可能需要在“系统设置 → 隐私与安全性”中允许；不要关闭系统安全检查。
+
+Mac 存档与实验报告位于 `~/Library/Application Support/FlyBrainPet`，报告在其 `lab_reports` 子目录。Windows 继续使用原存档位置。macOS 原生透明窗口、右键及滚轮有平台适配；实际显示效果仍需用户桌面确认，CI 组件测试不等于完整视觉验收。
+
+### 直接运行 EXE（Windows x64）
+
+双击 `dist/小果.exe` 即可启动，不需要安装 Python。可以把这个单文件复制到其它文件夹或 Windows x64 电脑；右键小果仍可打开学习实验室、五子棋和象棋。退出使用右键菜单“保存并退出”。
+
+EXE 与源码版使用相同的 `%LOCALAPPDATA%\FlyBrainPet` 存档，升级无需迁移；同一存档不能同时运行两个小果。EXE 的实验报告保存在 `%LOCALAPPDATA%\FlyBrainPet\lab_reports`，不会随临时解压目录被清除。
+
+可选命令：`小果.exe --lab` 独立打开实验室，`小果.exe --games` 独立打开棋桌，`小果.exe --data-dir "D:\MyPetData"` 使用独立宠物存档。
+
+重新打包（需要带 tkinter 的 Python 3.14）：
+
+~~~powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\build_exe.ps1
+~~~
+
+构建依赖安装在项目 `.venv` 中；`xiaoguo.spec` 显式包含两个 HTML 页面，不包含个人存档或历史实验报告。可执行 `小果.exe --self-test "D:\Temp\xiaoguo-check.json"` 验证内置 Tk、学习回调、存档恢复、HTML、实验 API 和棋步保存，测试使用临时存档；退出码 0 且报告 `passed: true` 表示通过。该检查不等同于原生截图或其它电脑实测。
+
+### 自动构建与本机复现
+
+`.github/workflows/build.yml` 在推送 main、创建 PR、手动 Run workflow 时构建 Windows x64、macOS arm64 和 macOS x64。每个平台先运行回归测试，再打包并直接运行产物自检；通过后上传保留 30 天的应用包，验证报告保留 14 天。
+
+推送 `v*` 版本标签时，只有三平台全部通过才自动创建或更新该标签对应的 GitHub Release，并上传应用 ZIP 和 SHA256。普通分支构建没有 Release 写权限。
+
+在目标系统安装带 Tk 的 Python 3.14.0，可复现同样的构建与自检：
+
+~~~sh
+python -m pip install -r requirements-build.txt
+python -m unittest discover -v
+python ci/build_release.py
+~~~
+
+产物在 `release/`。Windows 使用单文件 EXE，macOS 使用带完整资源的 `.app` bundle，并用 `ditto` 打包以保留可执行权限和符号链接。每种平台需要在对应系统上构建；Mac 两种架构分别产包，不依赖 Rosetta。
+
+### 从源码运行
 
 安装带 tkinter 的 [Python](https://www.python.org/downloads/windows/)，确保 python 命令可用。当前验证平台为 Windows，推荐使用已验证的 Python 3.14。
 
@@ -28,7 +76,7 @@ python app.py
 
 当前验证环境：Windows 10、Python 3.14.0、Tk 8.6、显示缩放 200%。只使用 Python 标准库和随 Python 提供的 Tk，不需要安装 pip 包、GPU、联网模型或 API 密钥。
 
-当前交付是 Python 源码和本机快捷方式，不是包含解释器的独立 EXE。换电脑需先安装带 tkinter 的 Python，再运行“创建桌面快捷方式.ps1”。
+源码版换电脑需先安装带 tkinter 的 Python，再运行“创建桌面快捷方式.ps1”；使用单文件 EXE 无需这些步骤。
 
 ## 怎样互动
 
@@ -121,11 +169,13 @@ softmax + 8% 均匀探索混合
 
 ## 本地记忆和恢复
 
-默认目录：
+Windows 默认目录：
 
 ~~~text
 %LOCALAPPDATA%\FlyBrainPet
 ~~~
+
+macOS 默认目录：`~/Library/Application Support/FlyBrainPet`。高级隔离测试可设置 `FLYBRAINPET_DATA_DIR` 指定统一的宠物、棋桌及 EXE/APP 实验报告目录，`--data-dir` 仍可单独覆盖宠物存档。
 
 其中：
 

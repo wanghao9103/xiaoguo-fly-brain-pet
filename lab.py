@@ -16,6 +16,7 @@ import time
 import webbrowser
 
 from brain import ACTIONS, ACTION_LABELS, FEATURE_NAMES, FlyBrain
+from app_paths import user_data_dir
 from experiments import BASE_FEATURE_LABELS, EXPERIMENTS, PRESETS, run_experiment, to_features
 
 ROOT = Path(__file__).resolve().parent
@@ -149,13 +150,16 @@ class LabSession:
 class LabService:
     def __init__(self, initial=None, port=0, report_dir=None, game_data_dir=None, on_game_event=None):
         self.session = LabSession(initial)
-        self.report_dir = Path(report_dir) if report_dir is not None else ROOT / "lab_reports"
+        # One-file bundles extract resources into a temporary, disposable directory.
+        report_root = (user_data_dir()
+                       if getattr(sys, "frozen", False) else ROOT)
+        self.report_dir = Path(report_dir) if report_dir is not None else report_root / "lab_reports"
         self.token = secrets.token_urlsafe(32)
         self.last_seen = time.monotonic()
         self.stopping = False
         self.games = None
         self.games_guard = threading.Lock()
-        self.game_data_dir = Path(game_data_dir) if game_data_dir is not None else Path(os.environ.get("LOCALAPPDATA", str(Path.home()))) / "FlyBrainPet" / "chess"
+        self.game_data_dir = Path(game_data_dir) if game_data_dir is not None else user_data_dir() / "chess"
         self.on_game_event = on_game_event
         owner = self
 

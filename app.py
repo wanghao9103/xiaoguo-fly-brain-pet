@@ -1,4 +1,4 @@
-"""Xiao Guo: an offline Windows desktop pet with a sparse online action network."""
+"""Xiao Guo: an offline desktop pet with a sparse online action network."""
 import argparse
 import ctypes
 from ctypes import wintypes
@@ -21,11 +21,12 @@ from engine import PetEngine, bounded
 from interaction import InteractionState
 from mood import MOODS, ambient_message, select_mood, tear_phases
 from storage import InstanceLock, PetStore
+from app_paths import user_data_dir
 
 ROOT = Path(__file__).resolve().parent
 WIDTH, HEIGHT = 208, 208
 DISPLAY_SIZES = {"mini": 156, "small": 208, "medium": 280}
-KEY = "#ff00ff"
+KEY = "systemTransparent" if sys.platform == "darwin" else "#ff00ff"
 INK, GREEN, PAPER = "#173f35", "#278366", "#f4f7f2"
 QUICK_ACTIONS = (("pet", "摸"), ("feed", "喂"), ("play", "玩"), ("praise", "赞"), ("menu", "⋯"))
 
@@ -75,6 +76,8 @@ class DesktopPet:
         if os.name == "nt":
             self.root.attributes("-transparentcolor", KEY)
             self.root.attributes("-toolwindow", True)
+        elif sys.platform == "darwin":
+            self.root.attributes("-transparent", True)
         self.root.protocol("WM_DELETE_WINDOW", self.close)
         self.root.bind("<Escape>", lambda event: self.close())
         self.root.report_callback_exception = self.callback_error
@@ -86,6 +89,10 @@ class DesktopPet:
         self.canvas.bind("<ButtonRelease-1>", self.release)
         self.canvas.bind("<Double-Button-1>", self.double_click)
         self.canvas.bind("<Button-3>", self.open_menu)
+        if sys.platform == "darwin":
+            self.canvas.bind("<Button-2>", self.open_menu)
+            self.canvas.bind("<Control-Button-1>", self.open_menu)
+            self.root.createcommand("tk::mac::Quit", self.close)
         self.area = work_area(self.root)
         initial = engine.position or [self.area[2] - self.width - 50, self.area[3] - self.height - 35]
         self.x, self.y = self.clamp(*initial)
@@ -583,7 +590,8 @@ class DesktopPet:
         outer.bind("<Configure>", lambda event: viewport.configure(scrollregion=viewport.bbox("all")))
         viewport.bind("<Configure>", lambda event: viewport.itemconfigure(content, width=event.width))
         self.panel_viewport, self.panel_content = viewport, outer
-        self.panel.bind("<MouseWheel>", lambda event: viewport.yview_scroll(-int(event.delta / 120), "units"))
+        self.panel.bind("<MouseWheel>", lambda event: viewport.yview_scroll(
+            -int(event.delta if sys.platform == "darwin" else event.delta / 120), "units"))
         tk.Label(outer, text="小果的日常", bg=PAPER, fg=INK,
                  font=("Microsoft YaHei UI", 21, "bold")).pack(anchor="w")
         tk.Label(outer, text="会从反馈里学习的离线小伙伴", bg=PAPER, fg="#617b70",
@@ -770,7 +778,7 @@ class DesktopPet:
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--data-dir", type=Path,
-                        default=Path(os.environ.get("LOCALAPPDATA", str(Path.home()))) / "FlyBrainPet")
+                        default=user_data_dir())
     parser.add_argument("--panel", action="store_true", help="Open the status and learning panel")
     args = parser.parse_args()
     enable_dpi()

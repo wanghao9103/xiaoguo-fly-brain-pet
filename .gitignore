@@ -3,6 +3,7 @@ qa/
 lab_reports/
 *.pyc
 dist/
+release/
 build/
 .venv/
 venv/

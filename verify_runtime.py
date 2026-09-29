@@ -2,6 +2,7 @@
 import json
 from pathlib import Path
 import tempfile
+import sys
 from types import SimpleNamespace
 from app import DesktopPet, enable_dpi
 from brain import ACTIONS
@@ -19,6 +20,9 @@ def run():
         app = DesktopPet(engine, store)
         try:
             app.root.withdraw()
+            if sys.platform == "darwin":
+                checks["mac_transparent_window"] = bool(app.root.attributes("-transparent"))
+                checks["mac_context_menu_bindings"] = bool(app.canvas.bind("<Button-2>")) and bool(app.canvas.bind("<Control-Button-1>"))
             app.show_panel()
             app.panel.update_idletasks()
             layout = {"panel_size": [app.panel.winfo_width(), app.panel.winfo_height()],

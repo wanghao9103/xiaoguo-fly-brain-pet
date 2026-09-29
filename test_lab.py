@@ -4,11 +4,37 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
+from unittest.mock import patch
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 
 from brain import FlyBrain
 from lab import LabService, LabSession
+
+
+class ReportPathTests(unittest.TestCase):
+    def test_frozen_reports_are_persistent_and_override_is_respected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            with patch("lab.sys.frozen", True, create=True), patch.dict("os.environ", {"FLYBRAINPET_DATA_DIR": str(Path(directory) / "FlyBrainPet")}):
+                service = LabService()
+                try:
+                    self.assertEqual(service.report_dir, Path(directory) / "FlyBrainPet" / "lab_reports")
+                finally:
+                    service.stop()
+                service = LabService(report_dir=Path(directory) / "custom")
+                try:
+                    self.assertEqual(service.report_dir, Path(directory) / "custom")
+                finally:
+                    service.stop()
+
+    def test_source_reports_stay_in_project(self):
+        from lab import ROOT
+        with patch("lab.sys.frozen", False, create=True):
+            service = LabService()
+            try:
+                self.assertEqual(service.report_dir, ROOT / "lab_reports")
+            finally:
+                service.stop()
 
 
 class SessionTests(unittest.TestCase):

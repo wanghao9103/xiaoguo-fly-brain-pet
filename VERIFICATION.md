@@ -61,3 +61,13 @@ python verify_runtime.py
 ~~~
 
 最后一项需要图形桌面。自动 CI 仅运行无窗口测试和合成学习验证。
+
+## 2026-09-29 Windows 单文件 EXE
+
+- 构建环境：Windows 10 x64（19045）、Python 3.14.0、Tk 8.6、PyInstaller 6.22.0、hooks-contrib 2026.7。
+- 产物：`dist/小果.exe`，12,918,715 字节；捆绑 Python、Tcl/Tk、实验室和棋桌 HTML。
+- 原有 122 项 unittest 通过；新增 2 项报告路径回归测试通过。
+- 将最终 EXE 单独复制到 `qa/portable 中文 space/`，工作目录也切换到该处；PATH 只保留 Windows System32，移除 PYTHONHOME、PYTHONPATH、TCL_LIBRARY、TK_LIBRARY 后运行 `--self-test`，退出码 0，报告 `passed: true`、`frozen: true`。
+- EXE 内通过 15 项 Tk 布局/回调/存档检查、8 项合成学习检查及 7 项打包资源/HTTP/棋步保存检查。实验报告默认位于用户数据目录，显式报告目录覆盖仍有效；源码运行继续使用项目 lab_reports。
+- 报告：`qa/portable 中文 space/exe-verification.json`。测试使用临时存档，没有读取或训练正式宠物记忆。
+- 范围限制：未在另一台无 Python 的电脑或 Windows 11 上实测；未签名，未进行原生截图和浏览器交互验收。此次修改未发布 GitHub Release。
