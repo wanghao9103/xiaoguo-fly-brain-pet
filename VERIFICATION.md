@@ -47,7 +47,7 @@
 ## 限制
 
 - 原生桌面截图工具遇到接口兼容问题；没有把组件检查称为完整的原生视觉或鼠标端到端验收。
-- 未验证多显示器漫游、Mac/Linux 透明窗口、长期学习稳定性、语音或自然图片理解。
+- 未验证多显示器漫游、Linux 透明窗口、长期学习稳定性、语音或自然图片理解。Mac 透明窗口属性及组件检查已在后述 CI 中验证，用户桌面视觉效果尚需确认。
 - 合成实验不证明一般智能或主观意识。
 - 棋步评分误差与选招改变不证明棋力提升；未进行 Elo、长期自我对弈或正式比赛规则验收。
 - 可运行 python verify_runtime.py 在桌面会话中生成 qa/verification.json；qa/ 和个人实验报告不随仓库发布。
@@ -60,7 +60,7 @@ python verify_learning.py
 python verify_runtime.py
 ~~~
 
-最后一项需要图形桌面。自动 CI 仅运行无窗口测试和合成学习验证。
+最后一项需要图形桌面。自动 CI 现在还会构建并直接运行各平台产物的自检，包含上述 Tk 和合成学习验证。
 
 ## 2026-09-29 Windows 单文件 EXE
 
@@ -71,3 +71,14 @@ python verify_runtime.py
 - EXE 内通过 15 项 Tk 布局/回调/存档检查、8 项合成学习检查及 7 项打包资源/HTTP/棋步保存检查。实验报告默认位于用户数据目录，显式报告目录覆盖仍有效；源码运行继续使用项目 lab_reports。
 - 报告：`qa/portable 中文 space/exe-verification.json`。测试使用临时存档，没有读取或训练正式宠物记忆。
 - 范围限制：未在另一台无 Python 的电脑或 Windows 11 上实测；未签名，未进行原生截图和浏览器交互验收。此次修改未发布 GitHub Release。
+
+## 2026-09-29 GitHub Actions 三平台构建
+
+- 测试的代码提交：`fd42bee2733e09c388e9e603aa66e42bb4abbc66`。
+- [构建 36548679116](https://github.com/wanghao9103/xiaoguo-fly-brain-pet/actions/runs/36548679116) 三个构建 job 均成功：Windows x64（windows-2022）、macOS arm64（macos-14）、macOS x64（macos-15-intel）。
+- 每个平台 127 项回归测试通过。最终产物放入独立的中文/空格目录，移除 Python/Tcl 环境提示后运行 `--self-test`，退出码 0，报告 `passed: true`、`frozen: true`。
+- Windows 通过 15 项 Tk 检查，两个 Mac 平台各通过 17 项（含透明属性和菜单绑定）；另各通过 8 项合成学习、7 项资源/HTTP/保存检查。
+- 修复自检中的路径比较：临时路径可能经符号链接或系统别名映射，预期路径与 API 返回路径应先 resolve，再比较位置；原先三平台仅此项失败，其余行为通过。
+- 下载后的三个 ZIP 完整性、SHA256 均正确；Mac Mach-O 架构分别为 arm64/x86_64，bundle ID 与可执行权限正确。Mac 使用 ditto ZIP 保留 bundle 链接及权限；Windows 读取 ditto ZIP 时可用 `metadata_encoding='utf-8'` 正确解释中文文件名。
+- ZIP 大小：Windows 12,637,408 字节；Mac arm64 11,545,957 字节；Mac x64 12,191,835 字节。
+- 仅配置了 `v*` 标签自动发布 Release，本次未创建版本标签或 Release。没有 Developer ID 签名、公证及完整原生视觉验收。

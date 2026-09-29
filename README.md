@@ -18,7 +18,7 @@
 | xiaoguo-macos-arm64 | Apple Silicon（M 系列）Mac | 小果.app |
 | xiaoguo-macos-x64 | Intel Mac | 小果.app |
 
-Actions artifact 中包含应用 ZIP 和 SHA256 校验文件；先解压 artifact，再解压应用 ZIP。macOS 请保留完整 `.app`，可拖到“应用程序”后双击；右键、Control + 单击或底部“⋯”可打开菜单。Mac 版未使用 Apple Developer ID 签名及公证，首次打开可能需要在“系统设置 → 隐私与安全性”中允许；不要关闭系统安全检查。
+Actions artifact 中包含应用 ZIP 和 SHA256 校验文件；先解压 artifact，再解压应用 ZIP。macOS 请保留完整 `.app`，可拖到“应用程序”后双击；右键、Control + 单击或底部“⋯”可打开菜单。Mac 版未使用 Apple Developer ID 签名及公证，首次打开可能需要按 [Apple 的说明](https://support.apple.com/102445) 在“系统设置 → 隐私与安全性”中允许。
 
 Mac 存档与实验报告位于 `~/Library/Application Support/FlyBrainPet`，报告在其 `lab_reports` 子目录。Windows 继续使用原存档位置。macOS 原生透明窗口、右键及滚轮有平台适配；实际显示效果仍需用户桌面确认，CI 组件测试不等于完整视觉验收。
 
@@ -56,7 +56,7 @@ python ci/build_release.py
 
 ### 从源码运行
 
-安装带 tkinter 的 [Python](https://www.python.org/downloads/windows/)，确保 python 命令可用。当前验证平台为 Windows，推荐使用已验证的 Python 3.14。
+安装带 tkinter 的 [Python](https://www.python.org/downloads/)，确保 python 命令可用。Windows 和 macOS 构建均使用已验证的 Python 3.14.0。
 
 ~~~powershell
 git clone https://github.com/wanghao9103/xiaoguo-fly-brain-pet.git
@@ -239,7 +239,7 @@ python verify_runtime.py
 
 这些数字来自固定合成实验，不代表真实用户互动成功率、动物行为拟合度或意识证据。
 
-测试在 Windows 上完成。Tk 组件检查需要图形桌面；GitHub Actions 仅运行无窗口自动测试和合成学习验证。已验证范围与限制见 [VERIFICATION.md](VERIFICATION.md)。
+GitHub Actions 已在 Windows x64、macOS arm64 和 macOS x64 上分别通过 127 项回归测试，并运行打包后的应用完成 Tk 组件、合成学习、HTML、HTTP 和存档自检。[首轮成功构建与下载](https://github.com/wanghao9103/xiaoguo-fly-brain-pet/actions/runs/36548679116)。Tk 检查需要图形桌面，组件自检不等同于完整视觉验收；范围与限制见 [VERIFICATION.md](VERIFICATION.md)。
 
 ## 独立实验，不影响自己的小果
 
@@ -258,7 +258,7 @@ python app.py --panel --data-dir "$env:TEMP\FlyBrainPet-Experiment"
 | interaction.py | 短暂反馈动画、12 秒小游戏与计分时钟，不保存为长期记忆 |
 | mood.py | 读取现有状态，派生好奇、无聊、困倦等表现，不更新模型 |
 | storage.py | 严格加载、原子保存、损坏归档和单实例文件锁 |
-| app.py | Windows 透明窗口、动画、拖动、交互与学习面板 |
+| app.py | Windows/macOS 透明窗口、动画、拖动、交互与学习面板 |
 | test_brain.py / test_engine.py | 核心和持久化测试 |
 | verify_learning.py | 可复核的合成学习实验 |
 | verify_runtime.py | 使用临时存档的 Tk 组件检查 |
