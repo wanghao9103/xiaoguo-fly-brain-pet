@@ -1,50 +1,249 @@
-# 小果 · 果蝇启发的桌面宠物
+# XiaoGuo · A Fly-Inspired Learning Desktop Pet
 
-**XiaoGuo — an offline desktop pet for Windows and macOS with a fly-inspired sparse learning network.**
+**English** | [简体中文](README.zh-CN.md)
 
-小果是一个支持 Windows 和 macOS 构建的离线桌面宠物原型。它有独立的透明悬浮窗口，会休息、探索、靠近鼠标和玩耍；用户互动会更新行动网络的权重，退出后保存状态、记忆和模型。
+**An offline desktop pet for Windows and macOS with a fly-inspired sparse learning network.**
 
-这是受果蝇蘑菇体启发的人工网络，不是真实连接组仿真。能学习行为偏好不等于证明有主观意识。
+XiaoGuo (小果) lives in a floating, transparent desktop window. It chooses when to rest, explore, approach your pointer, or play. Your interactions update its action preferences, and its model, state, and recent memories persist between sessions.
 
-## 快速开始
+The network is inspired by the fruit fly mushroom body. It is not a simulation of a biological connectome, and learning behavioral preferences is not evidence of consciousness.
 
-### 下载自动构建
+## Quick start
 
-打开 [GitHub Actions 的 Build desktop apps](https://github.com/wanghao9103/xiaoguo-fly-brain-pet/actions/workflows/build.yml)，选择成功的运行，在 **Artifacts** 中下载对应平台的包。Actions 下载通常需要登录 GitHub；有版本发布后也可直接从 [Releases](https://github.com/wanghao9103/xiaoguo-fly-brain-pet/releases) 下载。
+### Download
 
-| 包名 | 平台 | 解压后的入口 |
+Get a published version from [Releases](https://github.com/wanghao9103/xiaoguo-fly-brain-pet/releases/latest). No Python installation is required.
+
+| Package | Platform | Run after extracting |
 | --- | --- | --- |
-| xiaoguo-windows-x64 | Windows x64 | 小果.exe |
-| xiaoguo-macos-arm64 | Apple Silicon（M 系列）Mac | 小果.app |
-| xiaoguo-macos-x64 | Intel Mac | 小果.app |
+| xiaoguo-windows-x64.zip | Windows x64 | 小果.exe |
+| xiaoguo-macos-arm64.zip | Apple Silicon Mac (M series) | 小果.app |
+| xiaoguo-macos-x64.zip | Intel Mac | 小果.app |
 
-Actions artifact 中包含应用 ZIP 和 SHA256 校验文件；先解压 artifact，再解压应用 ZIP。macOS 请保留完整 `.app`，可拖到“应用程序”后双击；右键、Control + 单击或底部“⋯”可打开菜单。Mac 版未使用 Apple Developer ID 签名及公证，首次打开可能需要按 [Apple 的说明](https://support.apple.com/102445) 在“系统设置 → 隐私与安全性”中允许。
+Each ZIP has a separate SHA256 checksum file on its release page. Keep the complete macOS .app bundle; you can move it into Applications and double-click it. The Mac app does not have an Apple Developer ID signature or notarization. If macOS blocks it, follow [Apple's instructions](https://support.apple.com/102445) for allowing a trusted app in System Settings → Privacy & Security.
 
-Mac 存档与实验报告位于 `~/Library/Application Support/FlyBrainPet`，报告在其 `lab_reports` 子目录。Windows 继续使用原存档位置。macOS 原生透明窗口、右键及滚轮有平台适配；实际显示效果仍需用户桌面确认，CI 组件测试不等于完整视觉验收。
+Development builds are under **Artifacts** in successful [Build desktop apps runs](https://github.com/wanghao9103/xiaoguo-fly-brain-pet/actions/workflows/build.yml). GitHub normally requires sign-in for artifact downloads. Extract the artifact first, then the application ZIP inside it.
 
-### 直接运行 EXE（Windows x64）
+**The application interface currently uses Chinese labels.** English explanations below help identify the controls. The language links at the top switch this documentation.
 
-双击 `dist/小果.exe` 即可启动，不需要安装 Python。可以把这个单文件复制到其它文件夹或 Windows x64 电脑；右键小果仍可打开学习实验室、五子棋和象棋。退出使用右键菜单“保存并退出”。
+### Run the packaged app
 
-EXE 与源码版使用相同的 `%LOCALAPPDATA%\FlyBrainPet` 存档，升级无需迁移；同一存档不能同时运行两个小果。EXE 的实验报告保存在 `%LOCALAPPDATA%\FlyBrainPet\lab_reports`，不会随临时解压目录被清除。
+On Windows, double-click 小果.exe, or dist/小果.exe after a local build. Right-click the pet for the status panel, learning laboratory, Gomoku, or Chinese chess. Choose **保存并退出** (Save and exit) to close it.
 
-可选命令：`小果.exe --lab` 独立打开实验室，`小果.exe --games` 独立打开棋桌，`小果.exe --data-dir "D:\MyPetData"` 使用独立宠物存档。
+The EXE and source version share the same Windows save directory, so existing memories need no migration. Exit the old instance before opening another one with the same save directory.
 
-重新打包（需要带 tkinter 的 Python 3.14）：
+Optional Windows commands:
 
 ~~~powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\build_exe.ps1
+.\小果.exe --lab
+.\小果.exe --games
+.\小果.exe --data-dir "D:\MyPetData"
 ~~~
 
-构建依赖安装在项目 `.venv` 中；`xiaoguo.spec` 显式包含两个 HTML 页面，不包含个人存档或历史实验报告。可执行 `小果.exe --self-test "D:\Temp\xiaoguo-check.json"` 验证内置 Tk、学习回调、存档恢复、HTML、实验 API 和棋步保存，测试使用临时存档；退出码 0 且报告 `passed: true` 表示通过。该检查不等同于原生截图或其它电脑实测。
+These open the standalone laboratory, the board-game page, or a pet with a separate save directory.
 
-### 自动构建与本机复现
+On macOS, open 小果.app. Right-click, Control-click, or use the bottom **⋯** button for the menu. Transparent windows, context menus, and scrolling have platform-specific handling. CI checks their attributes and component behavior; visual appearance still needs confirmation on your desktop.
 
-`.github/workflows/build.yml` 在推送 main、创建 PR、手动 Run workflow 时构建 Windows x64、macOS arm64 和 macOS x64。每个平台先运行回归测试，再打包并直接运行产物自检；通过后上传保留 30 天的应用包，验证报告保留 14 天。
+### Run from source
 
-推送 `v*` 版本标签时，只有三平台全部通过才自动创建或更新该标签对应的 GitHub Release，并上传应用 ZIP 和 SHA256。普通分支构建没有 Release 写权限。
+Install [Python](https://www.python.org/downloads/) with tkinter. Windows and macOS builds have been verified with Python 3.14.0.
 
-在目标系统安装带 Tk 的 Python 3.14.0，可复现同样的构建与自检：
+~~~sh
+git clone https://github.com/wanghao9103/xiaoguo-fly-brain-pet.git
+cd xiaoguo-fly-brain-pet
+python app.py
+~~~
+
+Runtime dependencies are the Python standard library and Tk. No additional runtime pip packages, GPU, cloud model, or API key is needed. The original local test environment was Windows 10, Python 3.14.0, Tk 8.6, and 200% scaling; CI also tests both Mac architectures.
+
+On Windows, 创建桌面快捷方式.ps1 creates pet and laboratory shortcuts. The launchers 启动小果.cmd, 启动学习实验室.cmd, and 启动棋桌.cmd are also Windows-specific. After moving the project, update or recreate shortcuts that point to its old location.
+
+Only the pet appears on startup, including the first launch. Open **状态与学习面板** (Status and learning panel) from the menu when needed, or use:
+
+~~~sh
+python app.py --panel
+~~~
+
+## Interaction guide
+
+| Action or control | Effect |
+| --- | --- |
+| Click the pet | Pet it and positively reinforce the action selected at click time |
+| Drag | Move it without giving a learning reward |
+| Double-click, or **玩** (Play) | Start a 12-second pointer-chasing game; **停** (Stop) ends it |
+| **摸 / 喂 / 玩 / 赞 / ⋯** | Pet / Feed / Play / Praise / Menu |
+| Right-click | Feed, pet, encourage, discourage, pause, stay in place, or exit |
+| **宠物大小** (Pet size) | Mini 156×156, small 208×208, or medium 280×280; small is the default |
+| Hover, or **看看它这次的选择** | Inspect the last actual decision and its source |
+| **鼓励当前动作** (Encourage current action) | Give +1 reward using the context in which the action was selected |
+| **制止当前动作** (Discourage current action) | Give −1 reward using that decision context |
+| **冻结学习** (Freeze learning) | Keep the pet active without changing network weights |
+| **暂停活动** (Pause activity) | Pause simulated time, movement, and weight learning; manual interactions may still affect state values |
+| **原地陪伴** (Stay in place) | Keep decisions and small animations, but stop moving the window |
+| **保存并退出** (Save and exit) | Save memories and close the pet |
+
+Closing the panel does not exit the pet. Esc also saves and exits when the pet has keyboard focus. Cross-monitor roaming is not supported. On Windows, movement is limited to the primary display's work area, excluding the taskbar.
+
+Petting shows a smile, hearts, and a small hop. Feeding shows food and chewing. Dragging makes it flutter, followed by a small bounce on release. It looks up and pauses autonomous movement near the pointer, making the controls easier to click. Idle bubbles disappear to reduce obstruction.
+
+During the chasing game, move the pointer away and let the pet approach it again. Each approach earns one point, up to three, within 12 seconds. A stationary pointer cannot repeatedly score. Stay-in-place mode still allows interaction by moving the pointer toward and away from the pet. Pausing or dragging cancels the game without a reward.
+
+Body-click animation is immediate, but learning waits for the double-click interval so a double-click does not also count as petting. Toolbar controls respond immediately. Check the panel's current action before encouraging or discouraging it. Probabilities describe contextual action tendencies, not emotional intensity or classification confidence.
+
+## Simulated moods during inactivity
+
+“Inactivity” means no interaction with XiaoGuo, not that you stopped using your computer. Hovering makes it look at you but does not count as petting or produce a learning reward.
+
+| Time without interaction | Appearance |
+| --- | --- |
+| Less than 45 seconds | Calm activity |
+| About 45 seconds | Curious, looking around |
+| About 2 minutes | Bored, drooping antennae, half-closed eyes, slower motion |
+| About 5 minutes | Sleepy, quieter, occasional yawns |
+| About 10 minutes | Forlorn expression and occasional tears |
+| After petting or feeding | Brief happiness; inactivity timer resets |
+
+Low energy can also cause sleepiness. Direct interaction, dragging, and games take visual priority. In a given phase, bubbles appear for at most about three seconds every 90 seconds. Most expression comes from the face and motion; the optional panel shows the mood.
+
+Moods are read-only derivatives of existing state. They add no rewards or save fields and do not override autonomous actions. Pausing stops the inactivity timer; closed time is not replayed. These rules do not represent subjective feelings.
+
+Crying is an animation, not a new learned action. Petting or feeding resets inactivity and briefly restores happiness. Low-energy protection, pausing, and active interactions take priority. Tears use the running simulation clock, so reaching the idle counter's limit does not freeze the animation.
+
+## Inspecting autonomous decisions
+
+Each autonomous decision records its inputs, probabilities, and sampled action. Hover or open the inspection menu to see a record such as “自己选：探索 · 32%” (Chose: Explore · 32%). Exploration is stochastic: the selected action need not have the highest probability.
+
+Forced low-energy rest is identified as a protection rule; a game you start is a user command. Petting and feeding provide feedback without relabeling the previous autonomous choice. Inspection does not sample again, change weights, or consume random-generator state.
+
+This exposes action selection, not language-based thought, self-awareness, or long-term planning. Forlorn expressions and tears remain presentation rules.
+
+## What the network does
+
+~~~text
+12 state/environment values, each paired with its complement → 24 inputs
+    ↓ Fixed random positive connections; 6 inputs per unit
+384 expansion units
+    ↓ Keep Top24 activations, then L2-normalize
+Sparse features
+    ↓ 4 trainable action-value readouts
+Softmax mixed with 8% uniform exploration
+    ↓
+Rest / Explore / Approach / Play
+~~~
+
+Inputs encode energy, fullness, interaction satisfaction, exploration tendency, pointer distance and speed, screen edges, recent petting and feeding, inactivity, time of day, and the stay-in-place setting.
+
+Connection indices, fixed positive projection strengths, and trainable readout weights are saved separately. The readouts contain 4 × 384 = 1,536 trainable parameters. There is no language model or cloud inference.
+
+About every six seconds, the pet chooses an action. Immediate reward prediction error updates the selected readout row. This is a **contextual bandit**, without multi-step planning or future-return estimation. Its learning rate is 0.20, with mild decay and weight clipping.
+
+Below 8% energy, a rule forces rest. The network did not learn that protection rule, although subsequent feedback can still update the value of resting.
+
+## Rules, learning, and recorded memories
+
+- **Rules:** simulated state dynamics, movement and drawing, low-energy protection, and intrinsic reward definitions.
+- **Learning:** rewards for actions in a context change readout weights and future preferences.
+- **Records:** recent events support inspection; they are not a language-memory system that reasons over every past experience.
+
+Intrinsic rewards are designed immediate utility signals: rest is more suitable at low energy, while play can be more suitable with sufficient energy and exploration tendency. User feedback and intrinsic rewards update the same readouts. Later experience can change preferences; a click does not guarantee a permanent habit.
+
+A chasing game temporarily controls the decision clock. Its reward uses the start context; cancellation gives no reward. Transient game and animation state is not saved as a persistent model, so reopening cannot replay old game rewards. Delayed clicks also retain their original action and features to avoid rewarding a different decision.
+
+Green cells in the panel show actual sparse-layer activations. Weight-update and feedback counters reflect real updates, not decorative animation.
+
+## Local saves and recovery
+
+| Platform | Default data directory |
+| --- | --- |
+| Windows | %LOCALAPPDATA%\FlyBrainPet |
+| macOS | ~/Library/Application Support/FlyBrainPet |
+
+For isolated runs, FLYBRAINPET_DATA_DIR overrides the shared root for the pet, board games, and packaged-app reports. The --data-dir option overrides pet saves alone.
+
+Files include:
+
+- **memory.json:** network, random-generator state, simulated state, chosen action, pending feedback context, window position, and the last 60 events.
+- **memory.backup.json:** the previous valid save.
+- **memory.damaged-*.json:** preserved corrupted saves.
+- **app.log:** error logs.
+- **display.json:** size preferences, separate from learned weights.
+- **instance.lock:** a runtime lock preventing concurrent writes to the same save.
+
+The app saves after interactions, about every 30 seconds, and on exit. Writes use same-directory temporary files, flush, fsync, and atomic replacement. Loading validates types, shapes, numeric values, and format versions.
+
+A damaged main save falls back to its backup while preserving the unreadable file. The app does not simulate hunger or replay rewards for time spent closed.
+
+Only simple environmental information such as pointer position is used. The pet does not read screen content, keyboard input, or other documents, or call external services. Its optional laboratory serves a local browser interface over 127.0.0.1 without uploading data.
+
+## Learning laboratory
+
+Run python lab.py, use the Windows laboratory launcher, or choose **神经网络实验室（独立副本）** (Neural network laboratory — independent copy) from the pet menu. Packaged apps also accept --lab.
+
+Adjust 12 contextual features, reward or discourage actions, and inspect probabilities and actual active units. You can apply 20 repeated rewards or sample 100 actions.
+
+Five automated experiments cover context association, reward reversal, unfamiliar perturbations and local generalization, old/new habit interference, and local feature sensitivity. Each uses another cloned model, leaving both the manual model and real pet untouched. Automated experiments use built-in contexts; sliders affect manual experiments only.
+
+Opened from the pet, the laboratory offers a network snapshot taken at opening time. Standalone sessions start with a blank experimental brain. Snapshots do not synchronize with the pet. A changed seed rebuilds connections only after **新建空白实验脑** (Create a blank experimental brain); automated-experiment seeds mainly control perturbation probes.
+
+**保存实验报告** (Save experiment report) exports JSON into the source project's lab_reports directory, or the user-data directory's lab_reports subdirectory in packaged apps. The page displays the path. Reports distinguish the full model at experiment start from the current manual state; further training marks earlier results as historical.
+
+Models live only for the laboratory session. A standalone service exits after 30 minutes without requests; a service opened from the pet stops when the pet exits. The laboratory does not open automatically.
+
+See the [learning laboratory guide (Chinese)](docs/LEARNING_LAB.md).
+
+## Gomoku and Chinese chess
+
+Run python lab.py --games, use the Windows board-game launcher, or choose **和小果下棋：五子棋 / 象棋** from the pet menu. Packaged apps accept --games. Games opened from the pet menu can trigger visual reactions to moves and results.
+
+The board supports Gomoku, Chinese chess (Xiangqi), either starting side, two search levels, undo, and new games. Separate fly-inspired sparse networks learn a search teacher's move evaluations and terminal feedback, then contribute to move selection. Each game saves its own weights. **看示范并学习 5 轮** (Watch and learn for five rounds) shows changes in actual evaluation error.
+
+Board-game learning is separate from the rest/explore/approach/play network. Disabling it pauses both training and neural scoring without deleting memories. This is a casual practice opponent, without a guarantee of steadily improving strength. Xiangqi uses a casual repetition-draw rule, not full competitive perpetual-check and perpetual-chase adjudication.
+
+See the [board-game guide (Chinese)](docs/CHESS.md).
+
+## Verification
+
+~~~sh
+python -m unittest discover -v
+python verify_learning.py
+python verify_runtime.py
+~~~
+
+The 127 regression tests cover core behavior and persistence, gestures and games, moods, decision records, laboratory isolation and HTTP, board rules and tactics, move memory, packaging, and data directories. The suite grew from 49 pet tests to 69 with the laboratory, 122 with board games, and 127 with packaging checks.
+
+- verify_learning.py uses synthetic contexts and never accesses real pet saves.
+- verify_runtime.py uses temporary saves to check Tk layout, callbacks, drag behavior, and persistence, producing qa/verification.json. It requires a graphical desktop.
+- Pet size uses explicit pixels instead of automatically doubling at 200% display scaling. The panel respects text scaling, and resizing preserves learned parameters.
+- In fixed synthetic experiments, tired-context rest reached about 86.69%, active-context play 86.70%, and approach after reversed feedback 86.71%.
+- Save/load preserved scores and probabilities exactly, along with the next 32 random action choices.
+
+These measurements are not real-user success rates, biological fits, or evidence of consciousness.
+
+GitHub Actions passed all 127 tests on Windows x64, macOS arm64, and macOS x64, then checked the packaged apps' Tk components, learning, HTML, HTTP, and saves. See the [successful build](https://github.com/wanghao9103/xiaoguo-fly-brain-pet/actions/runs/36548679116) and [verification details (Chinese)](VERIFICATION.md). Component checks are not a complete native visual review.
+
+### Experiment without changing your pet
+
+Windows PowerShell:
+
+~~~powershell
+python app.py --panel --data-dir "$env:TEMP\FlyBrainPet-Experiment"
+~~~
+
+macOS:
+
+~~~sh
+python app.py --panel --data-dir "/tmp/FlyBrainPet-Experiment"
+~~~
+
+These use a separate save directory. Do not overwrite real memories with synthetic test weights and describe them as preferences learned through actual interaction.
+
+## Build and release
+
+The [build workflow](.github/workflows/build.yml) runs on pushes to main, pull requests, and manual dispatch. Each platform tests, builds, and runs the standalone app's self-test before uploading packages. Application artifacts are retained for 30 days; diagnostic reports for 14 days.
+
+Pushing a v* tag creates or updates its Release only after all three builds pass, with application ZIPs and SHA256 files. Ordinary branch builds have no Release write permission.
+
+On the target OS, install Python 3.14.0 with Tk and run:
 
 ~~~sh
 python -m pip install -r requirements-build.txt
@@ -52,230 +251,54 @@ python -m unittest discover -v
 python ci/build_release.py
 ~~~
 
-产物在 `release/`。Windows 使用单文件 EXE，macOS 使用带完整资源的 `.app` bundle，并用 `ditto` 打包以保留可执行权限和符号链接。每种平台需要在对应系统上构建；Mac 两种架构分别产包，不依赖 Rosetta。
+Output goes into release/. Windows builds a single EXE; macOS builds a complete .app bundle, archived with ditto to preserve executable permissions and symbolic links. Each OS builds its own binaries. The two Mac architectures have separate packages and do not require Rosetta.
 
-### 从源码运行
-
-安装带 tkinter 的 [Python](https://www.python.org/downloads/)，确保 python 命令可用。Windows 和 macOS 构建均使用已验证的 Python 3.14.0。
+For a Windows EXE-only build with dependencies isolated in the project's .venv:
 
 ~~~powershell
-git clone https://github.com/wanghao9103/xiaoguo-fly-brain-pet.git
-cd xiaoguo-fly-brain-pet
-python app.py
+powershell -NoProfile -ExecutionPolicy Bypass -File .\build_exe.ps1
 ~~~
 
-运行“创建桌面快捷方式.ps1”可在当前机器创建 **小果 - 果蝇学习桌宠** 和 **小果 - 学习实验室** 两个入口。之后双击即可启动；重复启动同一宠物存档会提示已经运行。
-
-默认只显示桌面上的小果，首次启动也不自动打开大面板。面板在右键菜单“状态与学习面板”中按需打开。
-
-也可以双击项目内的“启动小果.cmd”，或在项目目录执行：
+The xiaoguo.spec file explicitly includes both HTML pages, without personal saves or historical reports. To self-test the EXE with temporary saves:
 
 ~~~powershell
-python app.py
+.\dist\小果.exe --self-test "D:\Temp\xiaoguo-check.json"
 ~~~
 
-当前验证环境：Windows 10、Python 3.14.0、Tk 8.6、显示缩放 200%。只使用 Python 标准库和随 Python 提供的 Tk，不需要安装 pip 包、GPU、联网模型或 API 密钥。
+Exit code 0 and passed: true indicate success. This does not replace testing on other computers or reviewing native appearance.
 
-源码版换电脑需先安装带 tkinter 的 Python，再运行“创建桌面快捷方式.ps1”；使用单文件 EXE 无需这些步骤。
+## Source map
 
-## 怎样互动
-
-| 操作 | 效果 |
+| File | Responsibility |
 | --- | --- |
-| 单击小果 | 抚摸，并对当时行动给出正反馈 |
-| 拖动小果 | 移动位置，不作为学习奖励 |
-| 双击小果，或点底部“玩” | 开始 12 秒追鼠标小游戏；再次点“停”可结束 |
-| 底部“摸 / 喂 / 玩 / 赞 / ⋯” | 直接互动；“⋯”打开快捷菜单，面板在菜单里 |
-| 右键 | 喂食、抚摸、鼓励、制止、暂停、原地陪伴、退出 |
-| 右键 → 宠物大小 | 迷你 156×156、小号 208×208、中号 280×280；默认小号 |
-| 悬停或右键 → 看看它这次的选择 | 查看刚才实际选中的动作与当时倾向，区分网络选择、保护规则和用户指令 |
-| 面板“鼓励当前动作” | 为选择该动作时的上下文给 +1 奖励 |
-| 面板“制止当前动作” | 为选择该动作时的上下文给 -1 奖励 |
-| 冻结学习 | 继续活动，停止改变网络权重 |
-| 暂停活动 | 暂停时间演化、移动及权重学习；手动喂食等互动仍可改变对应状态值 |
-| 原地陪伴 | 保留决策和小动作，停止窗口移动 |
-| 保存并退出 | 保存记忆并关闭宠物 |
+| brain.py | Fixed sparse encoding, TopK, action probabilities, reward learning, model validation |
+| engine.py | Simulated state, decision clock, reward attribution, event memory |
+| interaction.py | Transient effects and the 12-second chasing game |
+| mood.py | Read-only derived moods, without weight updates |
+| storage.py | Validated loading, atomic saves, corruption archives, instance locks |
+| app.py | Windows/macOS window, drawing, dragging, interaction, panel |
+| app_paths.py | Platform-specific persistent data paths |
+| test_brain.py / test_engine.py | Core and persistence tests |
+| verify_learning.py / verify_runtime.py | Synthetic learning and Tk component verification |
+| experiments.py / test_experiments.py | Five controlled experiments and reproducibility checks |
+| lab.py / lab.html / test_lab.py | Local laboratory, isolated models, reports, HTTP checks |
+| gomoku.py / xiangqi.py | Legal moves, candidate features, search teachers |
+| chess_memory.py / board_games.py / chess.html | Move learning, persistence, turns, browser board |
+| desktop_entry.py / packaged_smoke.py | Packaged entry points and isolated self-tests |
+| xiaoguo.spec / ci/build_release.py | Native packaging, verification, archives |
+| 创建桌面快捷方式.ps1 | Windows shortcuts for the current interpreter and project |
 
-关闭状态面板只会回到桌面，不会退出小果。小果获得键盘焦点时按 Esc 也能保存退出。初版活动范围为主显示器工作区，避开任务栏；不支持跨显示器漫游。
+## Documentation and research
 
-抚摸会显示笑脸、爱心和轻跳；喂食会出现果糖和咀嚼动作；拖动时振翅，放下后轻弹。鼠标靠近时小果会睁眼，并暂停自主移动，便于点击底部按钮。空闲气泡会收起，减少遮挡。
+The detailed guides currently use Chinese:
 
-追鼠标时，把鼠标移远再让小果追近；每次接近计 1 分，最多 3 分，12 秒结束。鼠标一直不动不会反复刷分。原地陪伴模式下小果不移动，仍可通过移远/移近鼠标互动。暂停或拖动会取消小游戏，取消不产生游戏奖励。
+- [Architecture and capability boundaries](docs/ARCHITECTURE.md)
+- [Learning laboratory: controls and metrics](docs/LEARNING_LAB.md)
+- [Gomoku, Xiangqi, and sparse move learning](docs/CHESS.md)
 
-单击身体的动画立即响应，学习奖励会等待系统双击时限，避免一次双击同时算成抚摸。底部按钮直接响应。如果明确需要启动时打开面板，可手动使用 python app.py --panel。
+Research background:
 
-为了容易理解反馈，先看面板中的“正在休息/探索/靠近/玩耍”，再点击鼓励或制止。概率是随当前情境变化的行动倾向，不是情绪强度或分类置信度。
+- [KCNet](https://arxiv.org/abs/2108.07554)
+- [Fly-inspired similarity search](https://doi.org/10.1126/science.aam9868)
 
-## 久未互动时的模拟情绪
-
-这里的“没互动”指没有和小果互动，不是没有使用电脑。鼠标悬停会让它看向你，但不会被算作抚摸或学习奖励。
-
-| 连续未互动时间 | 表现 |
-| --- | --- |
-| 少于 45 秒 | 平静活动 |
-| 约 45 秒后 | 好奇，左右张望 |
-| 约 2 分钟后 | 无聊，触角低垂、半眯眼，动作变慢 |
-| 约 5 分钟后 | 困倦，偶尔打哈欠，更安静 |
-| 约 10 分钟后 | 委屈表情，间歇掉几滴小眼泪 |
-| 摸摸或喂食后 | 短暂开心，重新开始未互动计时 |
-
-低精力也会出现困态；直接互动、拖动与小游戏优先显示相应动作。气泡在同一阶段内每 90 秒最多出现约 3 秒，主要依靠表情与动作表达。面板显示当前模拟情绪，但仍按需打开。
-
-情绪是现有状态的只读派生，不生成额外奖励、不强制改写自主动作、不新增存档字段。暂停时不累计未互动时间，关闭程序期间不补算。这些规则表现不代表主观感受。
-
-掉泪仅属于表现层，哭不是新增的学习动作。摸摸或喂食后重新计时并恢复短暂开心；极低精力保护、暂停和正在进行的互动优先。眼泪动画使用持续运行的模拟时钟，避免 idle 达到上限后动画停在同一帧。
-
-## 如何看出它在自主选择
-
-每次自主决策会记录当时的输入、概率和实际抽样动作。悬停或右键查看，可看到类似“自己选：探索 · 32%”的真实记录；其中含有探索随机性，选择不一定是最高概率的动作。
-
-低精力强制休息会明确标为保护规则，你发起的小游戏会标为用户指令。抚摸和喂食作为反馈，不会把之前的自主选择改标成指令。查看这些信息不会额外抽样、改变权重或消耗随机状态。
-
-这展示的是已有网络的行动选择能力，不是语言思维、自我意识或长期规划；委屈表情和掉泪仍由表现规则决定。
-
-## 网络确实参与了什么
-
-~~~text
-12 个状态/环境值，各加互补值 → 24 维输入
-    ↓ 固定随机正连接，每个单元接收 6 个输入
-384 个扩展单元
-    ↓ Top24，保留激活后做 L2 归一化
-稀疏特征
-    ↓ 4 个可学习的行动价值读出
-softmax + 8% 均匀探索混合
-    ↓
-休息 / 探索 / 靠近 / 玩耍
-~~~
-
-24 维输入包括精力、饱食度、互动满足度、探索倾向、鼠标远近/速度、屏幕边缘、近期抚摸/喂食、空闲时间、昼夜和原地陪伴设置的成对编码。
-
-固定连接索引、固定正投影强度和可训练读出权重分别保存。行动读出共 4 × 384 = 1536 个可训练参数；没有语言模型或云端推理。
-
-每约 6 秒选择一次动作。模型使用即时奖励预测误差更新所选动作的读出行，是 **contextual bandit（上下文行动价值学习）**，没有多步规划或未来回报估计。学习率为 0.20，带温和衰减和权重裁剪。
-
-若精力低于 8%，程序会强制休息。这是显式保护规则，不是神经网络自主学到的选择；之后仍可更新休息行动的价值。
-
-## 哪些是规则，哪些是学习
-
-- **规则**：精力等模拟状态怎样变化、动作如何移动和绘制、低精力保护、内在奖励的定义。
-- **学习**：在这些状态下，选择某个动作后得到的奖励怎样改变读出权重与未来动作倾向。
-- **记录**：最近互动事件用于回看；它们不是一个会自动推理所有往事的语言记忆系统。
-
-内在奖励是人为设计的即时效用信号，例如低精力时休息更合适、有精力且探索倾向较高时玩耍更合适。用户反馈与内在奖励会共同更新同一组读出，后续经历可能改变已有偏好，不保证一次点击就形成永久习惯。
-
-追鼠标小游戏是用户明确发起的玩耍命令，期间暂时让出自主决策时钟；结束时用开始游戏的上下文反馈给 play，取消不奖励。游戏和短暂动画不写入持久模型格式，重启后不会补发上一局奖励。延迟确认的身体单击则保存点击时的行动与特征，避免等待期间动作切换造成错误归因。
-
-面板的绿色格子来自真实的稀疏层激活；“权重更新”和“互动反馈”计数来自实际更新。没有用动画冒充学习，也不把模拟数值称为真实情绪。
-
-## 本地记忆和恢复
-
-Windows 默认目录：
-
-~~~text
-%LOCALAPPDATA%\FlyBrainPet
-~~~
-
-macOS 默认目录：`~/Library/Application Support/FlyBrainPet`。高级隔离测试可设置 `FLYBRAINPET_DATA_DIR` 指定统一的宠物、棋桌及 EXE/APP 实验报告目录，`--data-dir` 仍可单独覆盖宠物存档。
-
-其中：
-
-- memory.json：当前网络、随机生成器状态、模拟状态、选中动作、待反馈上下文、窗口位置和最近 60 条事件；
-- memory.backup.json：上一份有效存档；
-- memory.damaged-*.json：发现损坏时保留的原文件；
-- app.log：错误日志；
-- display.json：宠物大小偏好，与学习权重分别保存；
-- instance.lock：运行期文件锁，防止两个进程同时覆盖同一存档。
-
-互动后立即保存，运行中约每 30 秒保存一次，退出时再次保存。采用同目录临时文件、flush、fsync 和原子替换，读取时校验数据类型、形状、数值和版本。
-
-主存档损坏时尝试上一份备份；不会把无法读取的原文件悄悄删除。关闭期间不模拟持续饥饿，也不补跑长期离线奖励。
-
-仅使用鼠标位置等简单环境量，不读取屏幕内容、键盘输入或其它文档；宠物不请求外部服务。按需打开的学习实验室使用本机 127.0.0.1 接口，不上传到云端。
-
-## 可操作的神经网络实验室
-
-执行 python lab.py，或双击项目内“启动学习实验室.cmd”，即可在浏览器打开本地实验室。创建快捷方式后也可使用桌面入口。宠物右键菜单提供“神经网络实验室（独立副本）”。
-
-可以手动调整 12 个情境特征，为休息、探索、靠近或玩耍奖励/负反馈，观察概率曲线和真实活跃单元。支持连续奖励 20 次、随机试选 100 次。
-
-五个自动实验：情境学习、奖励反转、陌生扰动与局部泛化、新旧习惯干扰、局部特征敏感性。它们从当前实验模型再克隆一份计算，不改手动实验脑，更不改正式小果存档。自动实验使用内置情境；改变页面滑块只影响手动试验。
-
-从宠物菜单打开时，可选择“打开时的小果副本”；独立启动只有空白实验脑。副本是打开时刻的快照，不实时同步。更改随机种子后点“新建空白实验脑”才会重建连接；自动实验中的种子主要用于生成扰动探针。
-
-“保存实验报告”会把 JSON 写入项目 lab_reports 目录，页面返回实际位置。报告区分实验开始时的完整模型和当前手动状态；继续训练后，已有结果标记为历史，不混作新结果。
-
-模型只在实验室会话中保留。独立实验室 30 分钟没有请求会退出；从宠物菜单打开的实验室随宠物退出而停止。可随时重新打开。实验页面不自动常驻或弹出。
-
-教程：[学习实验室](docs/LEARNING_LAB.md)。
-
-## 和小果下棋并积累棋步记忆
-
-双击“启动棋桌.cmd”，或运行 python lab.py --games。重新启动桌宠后，右键菜单也提供“和小果下棋：五子棋 / 象棋”。从桌宠菜单打开时，落子与结果会让小果显示回应。
-
-支持五子棋、中国象棋、先后手、两档搜索、悔棋和重新开局。独立的果蝇式稀疏网络学习搜索老师的棋步评分与终局反馈，并参与选棋；两种棋分别保存权重。可点“看示范并学习 5 轮”观察实际评分误差变化。
-
-棋步学习与原来休息、探索等行为学习分开保存。关闭棋步学习会暂停训练和神经评分参与选棋，原记忆保留。当前为休闲陪练，不保证学习后棋力持续提高；象棋采用休闲重复判和，不裁决完整竞技长将长捉。
-
-操作、机制、存档与能力边界见 [棋桌指南](docs/CHESS.md)。
-
-## 怎样验证学习
-
-在项目目录执行：
-
-~~~powershell
-python -m unittest discover -v
-python verify_learning.py
-python verify_runtime.py
-~~~
-
-- 原有 20 项核心检查、14 项小游戏与手势检查、11 项派生情绪检查，以及 4 项决策记录检查，共 49 项自动测试。
-- 学习实验室增加 10 项计算实验测试和 10 项隔离/HTTP/报告测试，累计 69 项。
-- 棋桌增加 36 项规则/战术测试、4 项稀疏记忆测试、13 项会话/HTTP/桌宠接线测试，累计 122 项。
-- verify_learning.py 使用合成情境验证学习机制，完全不访问真实宠物存档。
-- verify_runtime.py 使用临时目录验证 Tk 布局、实际回调、拖动不奖励和保存恢复；产生 qa/verification.json。
-- 宠物大小采用明确的像素尺寸，不再跟随 200% 系统缩放自动放大；状态面板仍尊重系统文字缩放。大小切换的额外检查证明学习参数保持不变。
-- 合成学习中，疲劳情境的休息概率约 86.69%，活跃情境的玩耍概率约 86.70%；反转反馈后该情境的靠近概率约 86.71%。
-- 序列化往返的分数和概率误差均为 0，之后 32 次随机行动也一致。
-
-这些数字来自固定合成实验，不代表真实用户互动成功率、动物行为拟合度或意识证据。
-
-GitHub Actions 已在 Windows x64、macOS arm64 和 macOS x64 上分别通过 127 项回归测试，并运行打包后的应用完成 Tk 组件、合成学习、HTML、HTTP 和存档自检。[首轮成功构建与下载](https://github.com/wanghao9103/xiaoguo-fly-brain-pet/actions/runs/36548679116)。Tk 检查需要图形桌面，组件自检不等同于完整视觉验收；范围与限制见 [VERIFICATION.md](VERIFICATION.md)。
-
-## 独立实验，不影响自己的小果
-
-~~~powershell
-python app.py --panel --data-dir "$env:TEMP\FlyBrainPet-Experiment"
-~~~
-
-这会使用另一个存档目录。不要把合成测试权重写入平时使用的目录，再称为用户实际养成的偏好。
-
-## 源码导览
-
-| 文件 | 职责 |
-| --- | --- |
-| brain.py | 固定稀疏编码、TopK、行动概率、奖励学习与模型验证 |
-| engine.py | 模拟状态、决策时钟、奖励归因与事件记忆 |
-| interaction.py | 短暂反馈动画、12 秒小游戏与计分时钟，不保存为长期记忆 |
-| mood.py | 读取现有状态，派生好奇、无聊、困倦等表现，不更新模型 |
-| storage.py | 严格加载、原子保存、损坏归档和单实例文件锁 |
-| app.py | Windows/macOS 透明窗口、动画、拖动、交互与学习面板 |
-| test_brain.py / test_engine.py | 核心和持久化测试 |
-| verify_learning.py | 可复核的合成学习实验 |
-| verify_runtime.py | 使用临时存档的 Tk 组件检查 |
-| experiments.py / test_experiments.py | 五类合成对照实验及可复现性检查 |
-| lab.py / lab.html / test_lab.py | 本机实验页面、隔离模型、报告与 HTTP 验证 |
-| gomoku.py / xiangqi.py | 五子棋与象棋的合法规则、候选特征和搜索老师 |
-| chess_memory.py / board_games.py / chess.html | 独立棋步学习与记忆、人机回合、浏览器棋桌 |
-| 创建桌面快捷方式.ps1 | 为当前机器的 pythonw 和项目目录创建快捷方式 |
-
-移动项目目录后，重新运行快捷方式创建脚本，避免旧快捷方式仍指向原位置。
-
-## 文档与研究背景
-
-- [结构与能力边界](docs/ARCHITECTURE.md)
-- [学习实验室操作与指标解释](docs/LEARNING_LAB.md)
-- [五子棋、象棋与果蝇式棋步学习](docs/CHESS.md)
-- [KCNet 研究](https://arxiv.org/abs/2108.07554)
-- [果蝇启发的相似性搜索](https://doi.org/10.1126/science.aam9868)
-
-相关研究提供设计背景，本项目是独立教学实现，不是论文结果的逐项复现。
+These studies inform the design. This is an independent educational implementation, not a reproduction of every result in those papers.
